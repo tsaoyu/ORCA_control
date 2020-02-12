@@ -1,0 +1,13 @@
+<launch>
+<!-- This launch file bypass control signal from top side to the ROV without sending any ROV command. -->
+<!-- GPSInput module is loaded by default so you can use fake GPS signal in QGroundControl. -->
+
+    <machine name="top" address="192.168.2.1" user="nelson"/>
+    <machine name="rov" address="192.168.2.2" user="red"/>
+
+    <include file="$(find redrov_missions)/launch/data_logger.launch" />
+    <node machine="rov" pkg="bluerov_missions" name="mavproxy" type="mavproxy.sh"/>
+
+
+
+</launch>
