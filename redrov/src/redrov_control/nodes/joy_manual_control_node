@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+import sys, socket
+import rospy
+from redrov_missions.bridge import Bridge
+
+from sensor_msgs.msg import Joy
+from geometry_msgs.msg import Wrench
+
+class JoyManualControl():
+
+    def __init__(self, port=14551, cmd_wrench_enable=False):
+        self.cmd_wrench_enable = cmd_wrench_enable
+        self.armed = False
+        self.port = port
+
+        self.mode = ["MANUAL"]    # initial mode
+        self.modes = ["ALT_HOLD", "STABILIZE", "MANUAL"]
+
+        self.force_x, self.force_y, self.force_z = 1500, 1500, 1500
+        self.torque_z = 1500     # Neutral PWM at 1500
+
+        self.create_bridge_connection()
+        self.joy_sub = rospy.Subscriber('/top_side/joy', Joy, self.joy_callback, queue_size=50)
+        self.cmd_wrench_sub = rospy.Subscriber('/cmd_wrench', Wrench, self.cmd_wrench_callback, queue_size=50)
+
+    def read_parameters(self):
+        self.translation_limit = rospy.get_param('/thrust_limits/translation/limit', 400)
+        self.rotation_limit = rospy.get_param('/thrust_limits/rotation/limit', 400)
+        self.max_trans_effort = rospy.get_param('/thrust_limits/translation/max_effort', 100)
+        self.max_rot_effort = rospy.get_param('/thrust_limits/rotation/max_effort', 100)
+        self.effort_factor_trans = self.translation_limit / self.max_trans_effort
+        self.effort_factor_rot = self.rotation_limit/ self.max_rot_effort
+
+
+    def create_bridge_connection(self):
+        device = 'udp:192.168.2.2:' + self.port
+        while not rospy.is_shutdown():
+            try: 
+                rospy.loginfo('Trying to start MAVproxy...')
+                self.bridge = Bridge(device)
+            except socket.error:
+                rospy.logerr(
+                    'Failed to make mavlink connection to device {}'.format(device)
+                )
+                rospy.sleep(1.0)
+            else:
+                break
+        if rospy.is_shutdown():
+            sys.exit(-1)
+        self.bridge.wait_conn()
+        rospy.loginfo('MAVproxy link started!')
+
+    def set_mode(self):
+        if self.mode in self.modes:
+            self.bridge.set_mode(self.mode)
+        else:
+            rospy.loginfo("Unknown mode")
+
+    def send_wrench(self):
+        self.bridge.set_cmd_wrench(self.force_x, self.force_y, self.force_z, self.torque_z)
+
+    def joy_callback(self, msg):
+
+        if msg.buttons[7]:
+            if self.armed:
+                self.armed = False
+                rospy.loginfo("Disarm the vehicle...")
+            else:
+                self.armed = True
+                rospy.loginfo("Arm the vehicle...")
+
+        if msg.buttons[0]:
+            if self.cmd_wrench_enable:
+                self.cmd_wrench_enable = False
+                rospy.loginfo('Disable autonomous control Don\'t forget to disarm...')
+            else:
+                self.cmd_wrench_enable = False
+                rospy.loginfo('Enable autonomous control...')
+        
+        if msg.buttons[1]:
+            self.mode = "MANUAL"
+
+        if msg.buttons[2]:
+            self.mode = "ALT_HOLD"
+
+        if msg.buttons[3]:
+            self.mode = "STABILIZE"
+        self.set_mode()
+
+        if not self.cmd_wrench_enable:
+            self.force_x = 1500 + int(msg.axes[1] * self.translation_limit)
+            self.force_y = 1500 + int(msg.axes[0] * self.translation_limit)
+            self.force_y = 1500 + int(msg.axes[4] * self.translation_limit)
+            self.torque_z = 1500 - int(msg.axes[3] * self.rotation_limit)
+
+    def cmd_wrench_callback(self, msg):
+
+        if self.cmd_wrench_enable:
+            x, y, z = msg.force.x, msg.force.y, msg.force.z
+            r_z = msg.torque.z
+
+            x = max(-self.max_trans_effort, min(self.max_trans_effort, x))
+            y = max(-self.max_trans_effort, min(self.max_trans_effort, y))
+            z = max(-self.max_trans_effort, min(self.max_trans_effort, z))
+            r_z = max(-self.max_trans_effort, min(self.max_rot_effort, r_z))
+
+            self.force_x = 1500 + int(self.effort_factor_trans * x)
+            self.force_y = 1500 + int(self.effort_factor_trans * y)
+            self.force_z = 1500 + int(self.effort_factor_trans * z)
+            self.torque_z = 1500 + int(self.effort_factor_rot * r_z)
+
+
+if __name__ == '__main__':
+    
+    rospy.init_node('bluerov_cruise_control_node')
+
+    joy_manual_control = JoyManualControl()
+
+    
+    while not rospy.is_shutdown():
+        joy_manual_control.bridge.set_mode('manual')
+        joy_manual_control.bridge.arm_throttle(False)
+        mode, arm = joy_manual_control.bridge.get_mode()
+        if mode == 'MANUAL' and not arm:
+            break
+        rospy.sleep(0.5)
+
+    rate = rospy.Rate(50)
+    while not rospy.is_shutdown():
+        joy_manual_control.bridge.update()
+        joy_manual_control.send_wrench()
+        rate.sleep()
+
+
+
+
