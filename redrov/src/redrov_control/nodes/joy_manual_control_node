@@ -31,7 +31,7 @@ class JoyManualControl():
         self.max_rot_effort = rospy.get_param('/thrust_limits/rotation/max_effort', 100)
         self.effort_factor_trans = self.translation_limit / self.max_trans_effort
         self.effort_factor_rot = self.rotation_limit/ self.max_rot_effort
-
+        rospy.loginfo("Joy control parameters all loaded!")
 
     def create_bridge_connection(self):
         device = 'udp:192.168.2.2:' + str(self.port)
