@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+echo "On ${BLUEROV2_IP:=192.168.2.2}, pushing to bareclone..."
+ssh jetson@$BLUEROV2_IP 'cd ~/ORCA_control; git push bareclone master'
+
+echo "Pulling from the pi..."
+git pull jetson@$BLUEROV2_IP:orca-bluerov-bare master
