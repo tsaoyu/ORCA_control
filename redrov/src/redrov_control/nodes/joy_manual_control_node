@@ -19,7 +19,7 @@ class JoyManualControl():
         self.force_x, self.force_y, self.force_z = 1500, 1500, 1500
         self.torque_z = 1500     # Neutral PWM at 1500
 
-        self.create_bridge_connection()
+        
         self.read_parameters()
         self.joy_sub = rospy.Subscriber('/joy', Joy, self.joy_callback, queue_size=50)
         self.cmd_wrench_sub = rospy.Subscriber('/cmd_wrench', Wrench, self.cmd_wrench_callback, queue_size=50)
@@ -52,6 +52,15 @@ class JoyManualControl():
             sys.exit(-1)
         self.bridge.wait_conn()
         rospy.loginfo('MAVproxy link started!')
+
+    def mannual_armed_start(self):
+        while not rospy.is_shutdown():
+            self.bridge.set_mode('MANUAL')
+            self.bridge.arm_throttle(False)
+            mode, arm = joy_manual_control.bridge.get_mode()
+            if mode == 'MANUAL' and not arm:
+                break
+            rospy.sleep(0.5)
 
     def set_mode(self):
         if self.mode in self.modes:
@@ -91,6 +100,7 @@ class JoyManualControl():
 
         if msg.buttons[3]:
             self.mode = "STABILIZE"
+
         self.set_mode()
 
         if not self.cmd_wrench_enable:
@@ -118,18 +128,13 @@ class JoyManualControl():
 
 if __name__ == '__main__':
     
-    rospy.init_node('bluerov_cruise_control_node')
+    rospy.init_node('joy_manual_control_node')
 
     joy_manual_control = JoyManualControl()
-    
-    while not rospy.is_shutdown():
-        joy_manual_control.bridge.set_mode('manual')
-        joy_manual_control.bridge.arm_throttle(False)
-        mode, arm = joy_manual_control.bridge.get_mode()
-        if mode == 'MANUAL' and not arm:
-            break
-        rospy.sleep(0.5)
+    joy_manual_control.create_bridge_connection()
+    joy_manual_control.mannual_armed_start()
 
+    
     rate = rospy.Rate(50)
     while not rospy.is_shutdown():
         joy_manual_control.bridge.update()
