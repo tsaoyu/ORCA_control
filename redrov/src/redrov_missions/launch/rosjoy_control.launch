@@ -1,7 +1,7 @@
 <launch>
 
-    <machine name="top" address="192.168.2.1" user="nelson"/>
-    <machine name="rov" address="192.168.2.2" user="jetson"/>
+    <machine name="top" address="192.168.2.1" user="nelson" env-loader="/home/nelson/ORCA_control/redrov/src/redrov_missions/scripts/top_setup.bash"/>
+    <machine name="rov" address="192.168.2.2" user="jetson" env-loader="/home/jetson/ORCA_control/redrov/src/redrov_missions/scripts/rov_setup.bash"/>
 
     <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
@@ -16,7 +16,7 @@
     <!-- Default mavlink proxy option is mavlink router, switch to mavproxy by uncommet the following -->
     <!-- <node machine="rov" pkg="redrov_missions" name="mavproxy" type="mavproxy.sh"/> -->
 
-    <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node"/>
+    <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node" output="screen"/>
 
 
 </launch>
