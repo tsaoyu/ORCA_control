@@ -14,6 +14,7 @@ class JoyManualControl():
         self.port = port
 
         self.mode =  "MANUAL"    # initial mode
+        self.current_mode = "MANUAL" 
         self.modes = ["ALT_HOLD", "STABILIZE", "MANUAL"]
 
         self.force_x, self.force_y, self.force_z = 1500, 1500, 1500
@@ -92,7 +93,7 @@ class JoyManualControl():
 
         if msg.buttons[3]:
             self.mode = "STABILIZE"
-            
+
         if self.mode != self.current_mode:
             self.set_mode()
 
