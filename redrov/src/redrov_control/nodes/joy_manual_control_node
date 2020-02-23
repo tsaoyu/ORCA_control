@@ -20,7 +20,7 @@ class JoyManualControl():
         self.torque_z = 1500     # Neutral PWM at 1500
 
         self.create_bridge_connection()
-        self.joy_sub = rospy.Subscriber('/top_side/joy', Joy, self.joy_callback, queue_size=50)
+        self.joy_sub = rospy.Subscriber('/joy', Joy, self.joy_callback, queue_size=50)
         self.cmd_wrench_sub = rospy.Subscriber('/cmd_wrench', Wrench, self.cmd_wrench_callback, queue_size=50)
 
     def read_parameters(self):
