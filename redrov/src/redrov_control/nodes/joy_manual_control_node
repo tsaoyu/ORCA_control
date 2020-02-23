@@ -89,8 +89,8 @@ class JoyManualControl():
 
         if not self.cmd_wrench_enable:
             self.force_x = 1500 + int(msg.axes[1] * self.translation_limit)
-            self.force_y = 1500 + int(msg.axes[0] * self.translation_limit)
-            self.force_y = 1500 + int(msg.axes[4] * self.translation_limit)
+            self.force_y = 1500 - int(msg.axes[0] * self.translation_limit)
+            self.force_z = 1500 + int(msg.axes[4] * self.translation_limit)
             self.torque_z = 1500 - int(msg.axes[3] * self.rotation_limit)
 
     def cmd_wrench_callback(self, msg):
@@ -115,7 +115,6 @@ if __name__ == '__main__':
     rospy.init_node('bluerov_cruise_control_node')
 
     joy_manual_control = JoyManualControl()
-
     
     while not rospy.is_shutdown():
         joy_manual_control.bridge.set_mode('manual')
