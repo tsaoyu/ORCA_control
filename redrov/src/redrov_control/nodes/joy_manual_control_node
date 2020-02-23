@@ -19,7 +19,6 @@ class JoyManualControl():
         self.force_x, self.force_y, self.force_z = 1500, 1500, 1500
         self.torque_z = 1500     # Neutral PWM at 1500
 
-        
         self.read_parameters()
         self.joy_sub = rospy.Subscriber('/joy', Joy, self.joy_callback, queue_size=50)
         self.cmd_wrench_sub = rospy.Subscriber('/cmd_wrench', Wrench, self.cmd_wrench_callback, queue_size=50)
@@ -36,31 +35,16 @@ class JoyManualControl():
     def create_bridge_connection(self):
         device = 'udp:192.168.2.2:' + str(self.port)
         rospy.loginfo('Trying to start MAVproxy...')
-        while not rospy.is_shutdown():
-            try: 
-                rospy.loginfo('Connecting to MAVproxy...')
-                self.bridge = Bridge(device)
-            except socket.error:
-                rospy.logerr(
-                    'Failed to make mavlink connection to device {}'.format(device)
-                )
-                rospy.sleep(1.0)
-            else:
-                break
-
-        if rospy.is_shutdown():
-            sys.exit(-1)
+        rospy.loginfo('Connecting to MAVproxy...')
+        self.bridge = Bridge(device)        
         self.bridge.wait_conn()
         rospy.loginfo('MAVproxy link started!')
 
     def mannual_armed_start(self):
-        while not rospy.is_shutdown():
-            self.bridge.set_mode('MANUAL')
-            self.bridge.arm_throttle(False)
-            mode, arm = joy_manual_control.bridge.get_mode()
-            if mode == 'MANUAL' and not arm:
-                break
-            rospy.sleep(0.5)
+        self.bridge.set_mode('MANUAL')
+        self.bridge.arm_throttle(False)
+        mode, arm = joy_manual_control.bridge.get_mode()
+
 
     def set_mode(self):
         if self.mode in self.modes:
