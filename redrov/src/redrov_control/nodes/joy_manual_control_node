@@ -13,7 +13,7 @@ class JoyManualControl():
         self.armed = False
         self.port = port
 
-        self.mode = ["MANUAL"]    # initial mode
+        self.mode =  "MANUAL"    # initial mode
         self.modes = ["ALT_HOLD", "STABILIZE", "MANUAL"]
 
         self.force_x, self.force_y, self.force_z = 1500, 1500, 1500
@@ -41,10 +41,8 @@ class JoyManualControl():
         rospy.loginfo('MAVproxy link started!')
 
     def mannual_armed_start(self):
-        self.bridge.set_mode('manual')
+        self.bridge.set_mode('MANUAL')
         self.bridge.arm_throttle(False)
-        mode, arm = joy_manual_control.bridge.get_mode()
-
 
     def set_mode(self):
         if self.mode in self.modes:
