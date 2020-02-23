@@ -5,7 +5,7 @@
             />
 
 <node machine="rov" pkg="rosbag" type="record" name="rosbag_record_rov"
-            args="record -ao  /home/pi/ORCA/rosbags/ROV.bag"
+            args="record -ao  /home/jetson/ORCA/rosbags/ROV.bag"
             />
 
 </launch>
