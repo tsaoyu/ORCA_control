@@ -56,6 +56,7 @@ class JoyManualControl():
         self.bridge.arm_throttle(False)
 
     def set_mode(self):
+        self.current_mode = self.mode
         if self.mode in self.modes:
             self.bridge.set_mode(self.mode)
             rospy.loginfo_throttle(0.5,'Set mode to {}'.format(self.mode))
@@ -91,8 +92,9 @@ class JoyManualControl():
 
         if msg.buttons[3]:
             self.mode = "STABILIZE"
-
-        self.set_mode()
+            
+        if self.mode != self.current_mode:
+            self.set_mode()
 
         if not self.cmd_wrench_enable:
             self.force_x = 1500 + int(msg.axes[1] * self.translation_limit)
