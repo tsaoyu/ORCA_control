@@ -41,7 +41,7 @@ class JoyManualControl():
         rospy.loginfo('MAVproxy link started!')
 
     def mannual_armed_start(self):
-        self.bridge.set_mode('MANUAL')
+        self.bridge.set_mode('manual')
         self.bridge.arm_throttle(False)
         mode, arm = joy_manual_control.bridge.get_mode()
 
