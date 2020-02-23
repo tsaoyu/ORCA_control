@@ -35,9 +35,10 @@ class JoyManualControl():
 
     def create_bridge_connection(self):
         device = 'udp:192.168.2.2:' + str(self.port)
+        rospy.loginfo('Trying to start MAVproxy...')
         while not rospy.is_shutdown():
             try: 
-                rospy.loginfo('Trying to start MAVproxy...')
+                rospy.loginfo('Connecting to MAVproxy...')
                 self.bridge = Bridge(device)
             except socket.error:
                 rospy.logerr(
@@ -64,12 +65,15 @@ class JoyManualControl():
     def joy_callback(self, msg):
 
         if msg.buttons[7]:
-            if self.armed:
-                self.armed = False
-                rospy.loginfo("Disarm the vehicle...")
-            else:
-                self.armed = True
-                rospy.loginfo("Arm the vehicle...")
+            self.armed = True
+            rospy.loginfo("Arm the vehicle...")
+
+        if msg.buttons[8]:
+            self.armed = False
+            rospy.loginfo("Disarm the vehicle...")
+            if self.cmd_wrench_enable:
+                self.cmd_wrench_enable = False
+                rospy.loginfo('Disable autonomous control ...')
 
         if msg.buttons[0]:
             if self.cmd_wrench_enable:
