@@ -77,14 +77,10 @@ class JoyManualControl():
                 self.cmd_wrench_enable = False
                 rospy.loginfo('Disable autonomous control ...')
 
-        if msg.buttons[0]:
-            if self.cmd_wrench_enable:
-                self.cmd_wrench_enable = False
-                rospy.loginfo('Disable autonomous control Don\'t forget to disarm...')
-            else:
-                self.cmd_wrench_enable = True
-                rospy.loginfo('Enable autonomous control...')
-        
+        if msg.buttons[0]: 
+            self.cmd_wrench_enable = True
+            rospy.loginfo_once('Enable autonomous control...')
+            
         if msg.buttons[1]:
             self.mode = "MANUAL"
 
