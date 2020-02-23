@@ -47,7 +47,7 @@ class JoyManualControl():
                 break
 
         if rospy.is_shutdown():
-        sys.exit(-1)           
+            sys.exit(-1)           
         self.bridge.wait_conn()
         rospy.loginfo('MAVproxy link started!')
 
