@@ -88,6 +88,8 @@ class JoyManualControl():
 
         if msg.buttons[1]:
             self.mode = "MANUAL"
+            if self.cmd_wrench_enable:
+                self.cmd_wrench_enable = False
 
         if msg.buttons[2]:
             self.mode = "ALT_HOLD"
