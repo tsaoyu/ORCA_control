@@ -70,7 +70,7 @@ class JoyManualControl():
             self.armed = True
             rospy.loginfo("Arm the vehicle...")
 
-        if msg.buttons[8]:
+        if msg.buttons[6]:
             self.armed = False
             rospy.loginfo("Disarm the vehicle...")
             if self.cmd_wrench_enable:
