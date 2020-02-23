@@ -6,7 +6,7 @@
     <machine name="rov" address="192.168.2.2" user="jetson"/>
 
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
-    <node machine="rov" pkg="bluerov_missions" name="mavlink_router" type="mavrouter.sh"/>
+    <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
 
 
 
