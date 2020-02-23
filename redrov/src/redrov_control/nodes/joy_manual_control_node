@@ -53,7 +53,7 @@ class JoyManualControl():
         rospy.loginfo('MAVproxy link started!')
 
     def mannual_armed_start(self):
-        self.bridge.set_mode('MANUAL')
+        self.set_mode = 'MANUAL'
         self.bridge.arm_throttle(False)
 
     def set_mode(self):
@@ -72,10 +72,12 @@ class JoyManualControl():
 
         if msg.buttons[7]:
             self.armed = True
+            self.bridge.arm_throttle(True)
             rospy.loginfo_throttle(0.5,"Arm the vehicle...")
 
         if msg.buttons[6]:
             self.armed = False
+            self.bridge.arm_throttle(False)
             rospy.loginfo_throttle(0.5,"Disarm the vehicle...")
             if self.cmd_wrench_enable:
                 self.cmd_wrench_enable = False
