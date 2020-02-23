@@ -58,7 +58,7 @@ class JoyManualControl():
     def set_mode(self):
         if self.mode in self.modes:
             self.bridge.set_mode(self.mode)
-            rospy.loginfo_once('Set mode to {}'.format(self.mode))
+            rospy.loginfo_throttle(0.5,'Set mode to {}'.format(self.mode))
 
         else:
             rospy.loginfo("Unknown mode")
@@ -70,18 +70,18 @@ class JoyManualControl():
 
         if msg.buttons[7]:
             self.armed = True
-            rospy.loginfo_once("Arm the vehicle...")
+            rospy.loginfo_throttle(0.5,"Arm the vehicle...")
 
         if msg.buttons[6]:
             self.armed = False
-            rospy.loginfo_once("Disarm the vehicle...")
+            rospy.loginfo_throttle(0.5,"Disarm the vehicle...")
             if self.cmd_wrench_enable:
                 self.cmd_wrench_enable = False
-                rospy.loginfo_once('Disable autonomous control ...')
+                rospy.loginfo_throttle(0.5,'Disable autonomous control ...')
 
         if msg.buttons[0]: 
             self.cmd_wrench_enable = True
-            rospy.loginfo_once('Enable autonomous control...')
+            rospy.loginfo_throttle(0.5,'Enable autonomous control...')
 
         if msg.buttons[1]:
             self.mode = "MANUAL"
