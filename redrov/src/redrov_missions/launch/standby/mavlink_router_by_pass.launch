@@ -2,8 +2,8 @@
 <!-- This launch file bypass control signal from top side to the ROV without sending any ROV command. -->
 <!-- NO GPS input but consume less memory and less CPU. Recommended when computation resource is limited. -->
 
-    <machine name="top" address="192.168.2.1" user="nelson"/>
-    <machine name="rov" address="192.168.2.2" user="jetson"/>
+    <machine name="top" address="192.168.2.1" user="nelson" env-loader="/home/nelson/ORCA_control/redrov/src/redrov_missions/scripts/top_setup.bash"/>
+    <machine name="rov" address="192.168.2.2" user="jetson" env-loader="/home/jetson/ORCA_control/redrov/src/redrov_missions/scripts/rov_setup.bash"/>
 
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
     <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
