@@ -34,9 +34,20 @@ class JoyManualControl():
 
     def create_bridge_connection(self):
         device = 'udp:192.168.2.2:' + str(self.port)
-        rospy.loginfo('Trying to start MAVproxy...')
-        rospy.loginfo('Connecting to MAVproxy...')
-        self.bridge = Bridge(device)        
+        while not rospy.is_shutdown():
+            try: 
+                rospy.loginfo('Trying to start MAVproxy...')
+                self.bridge = Bridge(device)
+            except socket.error:
+                rospy.logerr(
+                    'Failed to make mavlink connection to device {}'.format(device)
+                )
+                rospy.sleep(1.0)
+            else:
+                break
+
+        if rospy.is_shutdown():
+        sys.exit(-1)           
         self.bridge.wait_conn()
         rospy.loginfo('MAVproxy link started!')
 
