@@ -3,7 +3,7 @@
     <machine name="top" address="192.168.2.1" user="nelson"/>
     <machine name="rov" address="192.168.2.2" user="jetson"/>
 
-    <rosparam file="$(find bluerov_control)/config/propulsion_config.yaml" />
+    <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
 
     <node machine="top" pkg="joy" name="joy" type="joy_node">
@@ -16,7 +16,7 @@
     <!-- Default mavlink proxy option is mavlink router, switch to mavproxy by uncommet the following -->
     <!-- <node machine="rov" pkg="redrov_missions" name="mavproxy" type="mavproxy.sh"/> -->
 
-    <node machine="rov" pkg="bluerov_control" name="joy_manual_control_node" type="joy_manual_control_node"/>
+    <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node"/>
 
 
 </launch>
