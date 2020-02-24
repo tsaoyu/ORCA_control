@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+import rospy
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Wrench
+
+class VelocityControllerCollector():
+
+    def __init__(self):
+  
+        self.dof_name = ["surge", "sway", "heave", "pitch", "roll", "yaw"]
+        self.wrench = Wrench()
+
+
+        self.surge_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/surge', Float64, self.surge_callback, queue_size=10)
+        self.sway_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/sway', Float64, self.sway_callback, queue_size=10)
+        self.heave_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/heave', Float64, self.heave_callback, queue_size=10)
+
+        self.pitch_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/pitch', Float64, self.pitch_callback, queue_size=10)
+        self.roll_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/roll', Float64, self.roll_callback, queue_size=10)
+        self.yaw_sub = rospy.Subscriber('/velocity_controllers/cmd_wrench/yaw', Float64, self.yaw_callback, queue_size=10)
+
+        self.wrench_pub = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
+        
+        
+    def surge_callback(self, msg):
+        self.wrench.force.x = msg.data
+
+    def sway_callback(self, msg):
+        self.wrench.force.y = msg.data
+
+    def heave_callback(self, msg):
+        self.wrench.force.z = msg.data
+
+    def pitch_callback(self, msg):
+        self.wrench.torque.x = msg.data
+
+    def roll_callback(self, msg):
+        self.wrench.torque.y = msg.data
+
+    def yaw_callback(self, msg):
+        self.wrench.torque.z  = msg.data
+
+    def pub_cmd_wrench(self):
+        self.wrench_pub.publish(self.wrench)
+
+
+if __name__ == "__main__":
+    
+    rospy.init_node('velocity_controller_collector')
+    velocity_controller_collector = VelocityControllerCollector()
+
+    rate = rospy.Rate(50)
+
+    while not rospy.is_shutdown():
+        velocity_controller_collector.pub_cmd_wrench()
+        rate.sleep()
