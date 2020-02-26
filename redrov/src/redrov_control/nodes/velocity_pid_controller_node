@@ -1,0 +1,133 @@
+#!/usr/bin/python
+import rospy
+from geometry_msgs.msg import Twist, Wrench
+from nav_msgs.msg import Odometry
+from redrov_control.pid import PID
+from dynamic_reconfigure.server import Server
+from redrov_control.cfg import pid_configConfig
+from std_msgs.msg import Bool
+
+class VelocityPIDController:
+
+    def __init__(self):
+
+        self.dof_names_ = ["surge", "sway", "heave", "roll", "pitch", "yaw"]
+        self.para_names_ = ["kp", "ki", "kd"]
+        self.setup_subs()
+        self.setup_pubs()
+
+        self.get_control_params()
+        self.controllers_ = {}
+        self.setup_controllers()
+               
+        self.control_params_ = {}
+        self.control_settings_ = {}
+        self.control_current_settings_ = {}
+
+        self.parm_srv = Server(pid_configConfig, self.dynamic_reconfigure_callback)
+        
+        self.controller_summary()
+
+    def setup_subs(self):
+        rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback, queue_size=50)
+        rospy.Subscriber('/BodyROV01/odom', Odometry, self.odom_callback, queue_size=50)
+        # rospy.Subscriber('/velocity_controller_enabled', Bool,
+        # self.control_enabler, queue_size=10)
+
+    def setup_pubs(self):
+        self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
+
+    def get_control_params(self):
+        self.control_params_ = rospy.get_param('/velocity_controllers')
+
+    
+    def setup_controllers(self):
+        for dof in self.dof_names_:
+            self.controllers_[dof] = PID(P = float(self.control_params_[dof]['Kp']),
+                                         I = float(self.control_params_[dof]['Ki']),
+                                         D = float(self.control_params_[dof]['Kd']),
+                                         angle_error = bool(self.control_params_[dof]['angle_error']))
+
+            self.controllers_[dof].setWindup(float(self.control_params_[dof]['windup_limit']))
+            self.controllers_[dof].setLimit(float(self.control_params_[dof]['lower_limit']), float(self.control_params_[dof]['upper_limit'])
+            )
+    
+    def controller_summary(self):
+        number_of_controllers = len(self.controllers_)
+        rospy.loginfo('{} controller(s) have been created. Initial parameters for each controllers are:'.format(number_of_controllers))
+        for dof in self.dof_names_:
+            rospy.loginfo('Controller:' + dof + ' ' + self.controllers_[dof].summary())
+
+
+    def control_enabler(self):
+        pass
+
+    def change_controller_settings(self):
+        if self.control_current_settings_ != {}:
+            for dof in self.dof_names_:
+                for param in self.para_names_:
+                    current_setting = self.control_current_settings_[dof + '_' + param]
+                    setting = self.control_settings_[dof + '_' + param] 
+                    if current_setting!= setting:
+                        self.controllers_[dof].setIndividual(setting, param)
+                        rospy.loginfo("Change {}'s {} from {} to {}".format( dof, param, current_setting, setting))
+        
+        self.control_current_settings_ = self.control_settings_
+
+
+    def dynamic_reconfigure_callback(self, config, level):
+        self.control_settings_ = config
+        self.change_controller_settings()
+        # rospy.loginfo(config)
+        return config
+
+
+    def cmd_vel_callback(self, msg):
+        cmd_vel = [msg.linear.x, msg.linear.y, msg.linear.z, msg.angular.x, msg.angular.y, msg.angular.z]
+        
+        for dof, cmd in zip(self.dof_names_, cmd_vel):
+            self.controllers_[dof].SetPoint = cmd
+
+    def odom_callback(self, msg):
+        vels = [msg.twist.twist.linear.x, 
+                msg.twist.twist.linear.y,
+                msg.twist.twist.linear.z,
+                msg.twist.twist.angular.x,
+                msg.twist.twist.angular.y,
+                msg.twist.twist.angular.z]
+
+        for dof, vel in zip(self.dof_names_, vels):
+            self.controllers_[dof].update(vel)
+            # print(self.controllers_[dof].output)
+
+    def cmd_wrench_pub(self):
+        cmd_wrench = Wrench()
+        wrench = []
+
+        for dof in self.dof_names_:
+            wrench.append(self.controllers_[dof].output)
+
+        cmd_wrench.force.x, cmd_wrench.force.y, cmd_wrench.force.z, _, _, cmd_wrench.torque.z = wrench
+        # Only send x, y, z and yaw to the pixhawk controller
+        self.cmd_wrench_publisher.publish(cmd_wrench)
+
+
+
+    
+if __name__ == "__main__":
+
+    rospy.init_node("pid_controller", anonymous = False)
+    velocity_controller = VelocityPIDController()
+   
+
+    rate = rospy.Rate(50)
+    while not rospy.is_shutdown():
+        try:
+            velocity_controller.cmd_wrench_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
+
+
+    
+
