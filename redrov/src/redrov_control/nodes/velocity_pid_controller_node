@@ -4,7 +4,7 @@ from geometry_msgs.msg import Twist, Wrench
 from nav_msgs.msg import Odometry
 from redrov_control.pid import PID
 from dynamic_reconfigure.server import Server
-from redrov_control.cfg import pid_configConfig
+from redrov_control.cfg import pid_velocityConfig
 from std_msgs.msg import Bool
 
 class VelocityPIDController:
@@ -24,7 +24,7 @@ class VelocityPIDController:
         self.control_settings_ = {}
         self.control_current_settings_ = {}
 
-        self.parm_srv = Server(pid_configConfig, self.dynamic_reconfigure_callback)
+        self.parm_srv = Server(pid_velocityConfig, self.dynamic_reconfigure_callback)
         
         self.controller_summary()
 
