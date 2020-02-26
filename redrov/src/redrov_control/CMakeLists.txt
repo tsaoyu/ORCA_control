@@ -93,6 +93,8 @@ catkin_python_setup()
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
   cfg/PID.cfg
+  cfg/pid_velocity_config.cfg
+  cfg/pid_position_config.cfg
 )
 
 ###################################
