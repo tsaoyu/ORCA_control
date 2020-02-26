@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+import rospy
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, PoseStamped
+import tf
+import numpy as np
+from math import sin, cos
+
+class BodyPoseTransformer():
+
+    def __init__(self):
+
+        self.pose = None
+        self.pose_ref = None
+
+        self.odom_sub = rospy.Subscriber('/BodyROV01/odom', Odometry, self.odom_callback, queue_size=50)
+        self.pose_sub = rospy.Subscriber('/pose_ref', PoseStamped, self.pose_callback, queue_size=10)
+
+        self.error_publiser = rospy.Publisher('/pose_error', PoseStamped, queue_size=10)
+        # Publish error in body frame
+
+    def odom_callback(self, msg):
+        self.pose = msg.pose.pose
+
+    def pose_callback(self, msg):
+        self.pose_ref = msg.pose
+
+    def error_pub(self):
+        if self.pose == None or self.pose_ref == None:
+            return
+
+        quaternion_pose = np.array([self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w])
+        quaternion_ref = np.array([self.pose_ref.orientation.x, self.pose_ref.orientation.y, self.pose_ref.orientation.z, self.pose_ref.orientation.w])
+        quaternion_pose_inv = np.array([self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, -self.pose.orientation.w])
+
+        pos_pose = np.array([self.pose.position.x, self.pose.position.y, self.pose.position.z])
+        pos_pose_ref = np.array([self.pose_ref.position.x, self.pose_ref.position.y, self.pose_ref.position.z])
+
+        quaternion_trans = quaternion_ref * quaternion_pose_inv
+        pos_trans = pos_pose_ref - pos_pose
+
+        pose_error = PoseStamped()
+        pose_error.header.frame_id = "BodyROV01"
+        pose_error.header.stamp = rospy.Time.now()
+        pose_error.pose.orientation.x, pose_error.pose.orientation.y, pose_error.pose.orientation.z, pose_error.pose.orientation.w = quaternion_trans
+        pose_error.pose.position.x, pose_error.pose.position.y, pose_error.pose.position.z = pos_trans
+
+        self.error_publiser.publish(pose_error)
+
+
+if __name__ == "__main__":
+    
+    rospy.init_node('body_pose_transformer')
+    transformer = BodyPoseTransformer()
+
+    rate = rospy.Rate(100)
+
+    while not rospy.is_shutdown():
+        try:
+            transformer.error_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
