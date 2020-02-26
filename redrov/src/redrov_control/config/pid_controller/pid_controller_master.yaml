@@ -1,6 +1,6 @@
 velocity_controllers:
   surge:
-    Kp: 2
+    Kp: 1
     Ki: 0
     Kd: 0
     upper_limit: 100
