@@ -65,10 +65,10 @@ PidObject::PidObject() : error_(3, 0), filtered_error_(3, 0), error_deriv_(3, 0)
 
     // Wait for first messages
     while( ros::ok() && !ros::topic::waitForMessage<std_msgs::Float64>(setpoint_topic_, ros::Duration(10.)))
-        ROS_WARN_STREAM("Waiting for first setpoint message.");
+        ROS_INFO_STREAM("Waiting for first setpoint message.");
 
     while( ros::ok() && !ros::topic::waitForMessage<std_msgs::Float64>(topic_from_plant_, ros::Duration(10.)))
-        ROS_WARN_STREAM("Waiting for first state message from the plant.");
+        ROS_INFO_STREAM("Waiting for first state message from the plant.");
 
     // Respond to inputs until shut down
     while (ros::ok())
