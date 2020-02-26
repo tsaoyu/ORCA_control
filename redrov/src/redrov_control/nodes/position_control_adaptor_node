@@ -4,18 +4,14 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist, PoseStamped
 import tf
-import tf2_ros
+import numpy as np
+from math import sin, cos
 
-
-class VelocityControllerAdaptor():
+class PositionControllerAdaptor():
 
     def __init__(self):
 
-        self.tf_listener = tf.TransformListener()
-        self.tf_waiter = tf.TransformListener()
-        self.tf_transformer = tf.TransformerROS()
-        # self.wait_transformation()
-        self.tf_buffer = tf2_ros.Buffer()
+        self.transfomration_matrix = np.diag([1, 1, 1, 1, 1 ,1])
 
         self.odom_sub = rospy.Subscriber('/BodyROV01/odom', Odometry, self.odom_callback, queue_size=50)
         self.pose_sub = rospy.Subscriber('/pose_ref', PoseStamped, self.pose_callback, queue_size=10)
@@ -39,108 +35,65 @@ class VelocityControllerAdaptor():
         self.pose_ref["theta"] = float('nan')
         self.pose_ref["psi"]  = float('nan')
 
+
         self.pubs = {}
         for dof in self.dof_name:
             self.pubs[dof] = rospy.Publisher('/position_controllers/meas/{}'.format(dof), Float64, queue_size=10)
+        # Publish measured position in body frame
 
         self.pose_pubs = {}
         for dof in self.dof_name:
             self.pose_pubs[dof] = rospy.Publisher('/position_controllers/setpoint/{}'.format(dof), Float64, queue_size=10)
-
-        
-        # self.trans = 0
-        # self.rot = 0
-
-    # def local_transformation(self):
-
-    #     pose_orientation_desired = np.array([self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w])
-    #     pose_position_desired = np.array([self.pose.position.x, self.pose.position.y, self.pose.position.z])
-
-    #     pose_oritentation_meas = np.array([self.odom.pose.pose.orientation.x, 
-    #                                        self.odom.pose.pose.orientation.y,
-    #                                        self.odom.pose.pose.orientation.z,
-    #                                        self.odom.pose.pose.orientation.w])
-
-    #     pose_oritentation_meas_inv = np.array([self.odom.pose.pose.orientation.x, 
-    #                                        self.odom.pose.pose.orientation.y,
-    #                                        self.odom.pose.pose.orientation.z,
-    #                                        - self.odom.pose.pose.orientation.w])
-
-    #     pose_position_meas = np.array([self.odom.pose.pose.position.x, 
-    #                                    self.odom.pose.pose.position.y,
-    #                                    self.odom.pose.pose.position.z])
-
-    #     pose_error_orientation = pose_orientation_desired * pose_oritentation_meas_inv
-    #     pose_error_position = pose_position_desired - pose_position_meas
-
-
-    #     pose_error = Pose()
-    #     pose_error.position.x, pose_error.position.y, pose_error.position.z = pose_error_position 
-    #     pose_error.orientation.x, pose_error.orientation.y, pose_error.orientation.z, pose_error.orientation.w = pose_error_orientation
-
-    #     pose_error_body = tf.TransformerROS.transformPose('/BodyROV01', pose_error)
-       
-    def wait_transformation(self):
-        self.tf_waiter.waitForTransform('BodyROV01','qualisys', rospy.Time(0), rospy.Duration(3))
-
-    def pose_callback(self, msg):
-
-        pose_body = self.tf_transformer.transformPose('BodyROV01', msg)
-        #TODO: check the pitch roll and yaw consistency
-
-        pitch, roll, yaw = tf.transformations.euler_from_quaternion(pose_body.pose.quaternion,'sxyz')
-
-        self.pose_ref["x"] = pose_body.pose.position.x
-        self.pose_ref["y"] = pose_body.pose.position.y
-        self.pose_ref["z"] = pose_body.pose.position.z
-
-        self.pose_ref["phi"] = pitch
-        self.pose_ref["theta"] = roll
-        self.pose_ref["psi"]  = yaw
+        # Publish desired position in body frame
 
 
     def odom_callback(self, msg):
 
-        odom_world = PoseStamped()
-        odom_world.header = msg.header
-        odom_world.pose = msg.pose.pose
+        x = msg.pose.pose.position.x
+        y = msg.pose.pose.position.y
+        z = msg.pose.pose.position.z
+
+        quaternion = [msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w]
+        phi, theta, psi = tf.transformations.euler_from_quaternion(quaternion, 'sxyz')
+
+        self.transfomration_matrix = np.array(
+         [[cos(psi)*cos(theta), cos(theta)*sin(psi), -sin(theta), 0, 0, 0],
+         [cos(psi)*sin(phi)*sin(theta) - cos(phi)*sin(psi), cos(phi)*cos(psi) + sin(phi)*sin(psi)*sin(theta), cos(theta)*sin(phi), 0, 0, 0],
+         [sin(phi)*sin(psi) + cos(phi)*cos(psi)*sin(theta), cos(phi)*sin(psi)*sin(theta) - cos(psi)*sin(phi), cos(phi)*cos(theta), 0, 0, 0],
+         [0, 0, 0, 1, 0, -sin(theta)],
+         [0, 0, 0, 0, cos(phi), cos(theta)*sin(phi)],
+         [0, 0, 0, 0, -sin(phi), cos(phi)*cos(theta)]])
+
+        self.state["x"], self.state["y"], self.state["z"], self.state["phi"], self.state["theta"], self.state["psi"]  = np.dot(self.transfomration_matrix, np.array([x, y, z, phi, theta, psi]))
+
+
+    def pose_callback(self, msg):
+        x = msg.pose.position.x
+        y = msg.pose.position.y
+        z = msg.pose.position.z
         
-        transform = self.tf_buffer.lookup_transform('BodyROV01', 'qualisys', rospy.Time(0), rospy.Duration(10))
-        print(transform)
-        # odom_body = self.tf_transformer.transformPose('CylinderBody01', odom_world)
+        quaternion = [msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w]
+        phi, theta, psi = tf.transformations.euler_from_quaternion(quaternion, 'sxyz')
 
-        self.state["x"] = odom_body.pose.position.x
-        self.state["y"] = odom_body.pose.position.y
-        self.state["z"] = odom_body.pose.position.z
-        
-        # pitch, roll, yaw = tf.transformations.euler_from_quaternion(odom_body.pose.quaternion, 'sxyz')
+        self.pose_ref["x"], self.pose_ref["y"], self.pose_ref["z"], self.pose_ref["phi"], self.pose_ref["theta"], self.pose_ref["psi"]  = np.dot(self.transfomration_matrix, np.array([x, y, z, phi, theta, psi]))
 
-        self.state["pitch"] = pitch
-        self.state["roll"] = roll
-        self.state["yaw"]  = yaw
-
-    def pub_meas(self):
+    def meas_pub(self):
         for dof in self.dof_name:
             self.pubs[dof].publish(self.state[dof])
 
-    def pub_pose_ref(self):
+    def ref_pub(self):
         for dof in self.dof_name:
             self.pose_pubs[dof].publish(self.pose_ref[dof])
 
+
 if __name__ == "__main__":
     
-    
-
-    rospy.init_node('velocity_controller_adaptor')
-    velocity_controller_adaptor = VelocityControllerAdaptor()
+    rospy.init_node('position_controller_adaptor')
+    position_controller_adaptor = PositionControllerAdaptor()
 
     rate = rospy.Rate(50)
 
     while not rospy.is_shutdown():
-        velocity_controller_adaptor.pub_meas()
-        velocity_controller_adaptor.pub_pose_ref()
+        position_controller_adaptor.meas_pub()
+        position_controller_adaptor.ref_pub()
         rate.sleep()
-
-    
-
-

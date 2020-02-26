@@ -3,7 +3,7 @@
 
     <rosparam file="$(find redrov_control)/config/pid_controller/pid_controller_master.yaml" />
 
-    <node name="position_control_adaptor_node" pkg="redrov_control" type="position_control_adaptor_m_node" output="screen" />
+    <node name="position_control_adaptor_node" pkg="redrov_control" type="position_control_adaptor_node" output="screen" />
 <!-- 
  ns="position_controllers" -->
     <node name="x" pkg="redrov_control" type="pid_controller_node" ns="position_controllers" output="screen" >
