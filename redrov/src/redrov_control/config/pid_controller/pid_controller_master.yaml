@@ -7,7 +7,8 @@ velocity_controllers:
     lower_limit: -100
     windup_limit: 60
     max_loop_frequency: 60
-    min_loop_frequency: 20
+    min_loop_frequency: 10
+    angle_error: false
     topic_from_controller: /velocity_controllers/cmd_wrench/surge
     setpoint_topic: /velocity_controllers/setpoint/surge
     topic_from_plant: /velocity_controllers/meas/surge
@@ -19,8 +20,9 @@ velocity_controllers:
     upper_limit: 100
     lower_limit: -100
     windup_limit: 60
-    max_loop_frequency: 50
-    min_loop_frequency: 20
+    angle_error: false
+    max_loop_frequency: 60
+    min_loop_frequency: 10
     topic_from_controller: /velocity_controllers/cmd_wrench/sway
     setpoint_topic: /velocity_controllers/setpoint/sway
     topic_from_plant: /velocity_controllers/meas/sway
@@ -32,8 +34,9 @@ velocity_controllers:
     upper_limit: 100
     lower_limit: -100
     windup_limit: 60
-    max_loop_frequency: 50
-    min_loop_frequency: 20
+    angle_error: false
+    max_loop_frequency: 60
+    min_loop_frequency: 10
     topic_from_controller: /velocity_controllers/cmd_wrench/heave
     setpoint_topic: /velocity_controllers/setpoint/heave
     topic_from_plant: /velocity_controllers/meas/heave
@@ -47,6 +50,7 @@ velocity_controllers:
     windup_limit: 60
     max_loop_frequency: 50
     min_loop_frequency: 20
+    angle_error: true
     topic_from_controller: /velocity_controllers/cmd_wrench/roll
     setpoint_topic: /velocity_controllers/setpoint/roll
     topic_from_plant: /velocity_controllers/meas/roll
@@ -87,6 +91,7 @@ position_controllers:
     upper_limit: 2
     lower_limit: -2
     windup_limit: 1
+    angle_error: false
     max_loop_frequency: 50
     min_loop_frequency: 20
     topic_from_controller: /position_controllers/cmd_vel/x
@@ -100,6 +105,7 @@ position_controllers:
     upper_limit: 2
     lower_limit: -2
     windup_limit: 1
+    angle_error: false
     max_loop_frequency: 50
     min_loop_frequency: 20
     topic_from_controller: /position_controllers/cmd_vel/y
@@ -114,6 +120,7 @@ position_controllers:
     upper_limit: 1
     lower_limit: -1
     windup_limit: 1
+    angle_error: false
     max_loop_frequency: 50
     min_loop_frequency: 20
     topic_from_controller: /position_controllers/cmd_vel/z
