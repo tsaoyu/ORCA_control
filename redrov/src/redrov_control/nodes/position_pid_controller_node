@@ -1,0 +1,130 @@
+#!/usr/bin/python
+import rospy
+from geometry_msgs.msg import Twist, Wrench, Pose, PoseStamped
+from nav_msgs.msg import Odometry
+from redrov_control.pid import PID
+from dynamic_reconfigure.server import Server
+from redrov_control.cfg import pid_positionConfig
+from std_msgs.msg import Bool
+import tf
+import numpy as np
+
+class PositionPIDController:
+
+    def __init__(self):
+
+        self.dof_names_ = ["x", "y", "z", "phi", "theta", "psi"]
+        self.para_names_ = ["kp", "ki", "kd"]
+        self.setup_subs()
+        self.setup_pubs()
+
+        self.get_control_params()
+        self.controllers_ = {}
+        self.setup_controllers()
+               
+        self.control_params_ = {}
+        self.control_settings_ = {}
+        self.control_current_settings_ = {}
+
+        self.parm_srv = Server(pid_positionConfig, self.dynamic_reconfigure_callback)
+        
+        self.controller_summary()
+
+    def setup_subs(self):
+        rospy.Subscriber('/pose_error', PoseStamped, self.pose_callback, queue_size=50)
+
+    def setup_pubs(self):
+        self.cmd_vel_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+
+    def get_control_params(self):
+        self.control_params_ = rospy.get_param('/position_controllers')
+
+    
+    def setup_controllers(self):
+        for dof in self.dof_names_:
+            self.controllers_[dof] = PID(P = float(self.control_params_[dof]['Kp']),
+                                         I = float(self.control_params_[dof]['Ki']),
+                                         D = float(self.control_params_[dof]['Kd']),
+                                         angle_error = bool(self.control_params_[dof]['angle_error']))
+
+            self.controllers_[dof].setWindup(float(self.control_params_[dof]['windup_limit']))
+            self.controllers_[dof].setLimit(float(self.control_params_[dof]['lower_limit']), float(self.control_params_[dof]['upper_limit'])
+            )
+    
+    def controller_summary(self):
+        number_of_controllers = len(self.controllers_)
+        rospy.loginfo('{} controller(s) have been created. Initial parameters for each controllers are:'.format(number_of_controllers))
+        for dof in self.dof_names_:
+            rospy.loginfo('Controller:' + dof + ' ' + self.controllers_[dof].summary())
+
+
+    def control_enabler(self):
+        pass
+
+    def change_controller_settings(self):
+        if self.control_current_settings_ != {}:
+            for dof in self.dof_names_:
+                for param in self.para_names_:
+                    current_setting = self.control_current_settings_[dof + '_' + param]
+                    setting = self.control_settings_[dof + '_' + param] 
+                    if current_setting!= setting:
+                        self.controllers_[dof].setIndividual(setting, param)
+                        rospy.loginfo("Change {}'s {} from {} to {}".format( dof, param, current_setting, setting))
+        
+        self.control_current_settings_ = self.control_settings_
+
+
+    def dynamic_reconfigure_callback(self, config, level):
+        self.control_settings_ = config
+        self.change_controller_settings()
+        # rospy.loginfo(config)
+        return config
+
+
+    def pose_callback(self, msg):
+        error_quaternion = np.array([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
+        r, p, y = tf.transformations.euler_from_quaternion(error_quaternion)
+
+        pose_error = [msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, r, p, y]
+        
+        for dof, error in zip(self.dof_names_, pose_error):
+            self.controllers_[dof].updatebyerror(error)
+            # print(self.controllers_[dof].output)
+
+    def cmd_vel_pub(self):
+        cmd_vel = Twist()
+        twist = []
+
+        for dof in self.dof_names_:
+            twist.append(self.controllers_[dof].output)
+
+        cmd_vel.linear.x = twist[0]
+        cmd_vel.linear.y = twist[1]
+        cmd_vel.linear.z = twist[2]
+
+        cmd_vel.angular.x = twist[3]
+        cmd_vel.angular.y = twist[4]
+        cmd_vel.angular.z = twist[5]
+
+        self.cmd_vel_publisher.publish(cmd_vel)
+
+
+
+    
+if __name__ == "__main__":
+
+    rospy.init_node("position_pid_controller", anonymous = False)
+    position_controller = PositionPIDController()
+   
+
+    rate = rospy.Rate(50)
+    while not rospy.is_shutdown():
+        try:
+            position_controller.cmd_vel_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
+
+
+    
+
