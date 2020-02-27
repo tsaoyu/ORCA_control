@@ -214,4 +214,5 @@ target_link_libraries(pid_controller_node ${catkin_LIBRARIES}
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest(tests/test_transformer.launch)
+  add_rostest(tests/test_pid_controllers.launch)
 endif()
