@@ -1,0 +1,15 @@
+<launch>
+
+  <rosparam file="$(find redrov_control)/config/pid_controller/pid_controller_master.yaml" />
+  <param name="test_module" value="pid_controller_tests"/>
+  <node pkg="redrov_control" type="body_position_error_transformer_node" name="body_position_error_transformer_node" />
+  <node name="position_pid_controller" pkg="redrov_control" type="position_pid_controller_node"/>
+  <node name="velocity_pid_controller" pkg="redrov_control" type="velocity_pid_controller_node"/>
+
+
+  <test test-name="test_pidcontroller" pkg="redrov_control" type="pytest_runner.py" />
+  
+ 
+
+
+</launch>
