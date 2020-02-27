@@ -210,3 +210,8 @@ target_link_libraries(pid_controller_node ${catkin_LIBRARIES}
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(tests/test_transformer.launch)
+endif()

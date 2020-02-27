@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="redrov_control" type="body_position_error_transformer_node" name="body_position_error_transformer_node" />
+  <param name="test_module" value="transformer_node_tests"/>
+  <test test-name="test_transformer" pkg="redrov_control" type="pytest_runner.py" />
+</launch>
