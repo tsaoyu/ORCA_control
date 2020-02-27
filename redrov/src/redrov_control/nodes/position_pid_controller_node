@@ -83,13 +83,12 @@ class PositionPIDController:
 
     def pose_callback(self, msg):
         error_quaternion = np.array([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
-        r, p, y = tf.transformations.euler_from_quaternion(error_quaternion)
+        r, p, y = tf.transformations.euler_from_quaternion(error_quaternion, 'rxyz')
 
         pose_error = [msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, r, p, y]
         
         for dof, error in zip(self.dof_names_, pose_error):
             self.controllers_[dof].updatebyerror(error)
-            # print(self.controllers_[dof].output)
 
     def cmd_vel_pub(self):
         cmd_vel = Twist()
