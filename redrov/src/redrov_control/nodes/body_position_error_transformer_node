@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist, PoseStamped
 import tf
 import numpy as np
 from math import sin, cos
-from tf.transformations import quaternion_inverse, quaternion_multiply
+from tf.transformations import quaternion_inverse, quaternion_multiply, quaternion_conjugate
 
 class BodyPoseTransformer():
 
@@ -37,7 +37,7 @@ class BodyPoseTransformer():
         pos_pose = np.array([self.pose.position.x, self.pose.position.y, self.pose.position.z])
         pos_pose_ref = np.array([self.pose_ref.position.x, self.pose_ref.position.y, self.pose_ref.position.z])
 
-        quaternion_trans = tf.transformations.quaternion_multiply(quaternion_ref, quaternion_inverse(quaternion_pose))
+        quaternion_trans = tf.transformations.quaternion_multiply(quaternion_ref, quaternion_conjugate(quaternion_pose))
         pos_trans = pos_pose_ref - pos_pose
 
         pose_error = PoseStamped()

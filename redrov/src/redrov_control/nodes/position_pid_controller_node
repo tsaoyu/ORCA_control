@@ -83,7 +83,7 @@ class PositionPIDController:
 
     def pose_callback(self, msg):
         error_quaternion = np.array([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
-        r, p, y = tf.transformations.euler_from_quaternion(error_quaternion, 'rxyz')
+        r, p, y = tf.transformations.euler_from_quaternion(error_quaternion, 'sxyz')
 
         pose_error = [msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, r, p, y]
         
