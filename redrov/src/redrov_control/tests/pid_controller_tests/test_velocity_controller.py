@@ -166,7 +166,7 @@ def test_speed_angular_logic(node, waiter, euler_pose_publish, euler_odom_publis
     rospy.Subscriber('/cmd_wrench', Wrench, waiter.callback)
     euler_pose_publish.publish([0, 0, 0, 3, 0, 3])
     euler_odom_publish.publish([0, 0, 0, 0, 0, 0])
-    euler_odom_publish.publish_vel([0, 0, 0, 0, 0, 0])
+    euler_odom_publish.publish_vel([1, 1, 1, 0, 0, 0])
     waiter.wait(1) # give some time for the waiter to process the received data
 
     wrench = wrench_extraction(waiter.message[-1])
@@ -175,14 +175,11 @@ def test_speed_angular_logic(node, waiter, euler_pose_publish, euler_odom_publis
     euler_odom_publish.publish([2, 2, 2, 3, 0, 3])
     waiter.wait(0.5) # give some time for the waiter to process the received data
     wrench = wrench_extraction(waiter.message[-1])
-    assert np.allclose(wrench, [-2, -2, -1, 3, 0, 3])
+    assert np.allclose(wrench, [-2, -2, -1, 0, 0, 0])
 
 
     euler_odom_publish.publish_vel([1, 1, 1, 1, 0, 1])
     wrench = wrench_extraction(waiter.message[-1])
-    assert np.allclose(wrench, [-3, -3, -2, -4, 0, -4])
-
-    euler_odom_publish.publish_vel([-2, -2, -1, 0, 0, 0])
-    wrench = wrench_extraction(waiter.message[-1])
-    assert np.allclose(wrench, [0, 0, 0, 0, 0, 0])    
+    assert np.allclose(wrench, [-3, -3, -2, -1, 0, -1])
+  
 

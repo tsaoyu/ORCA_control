@@ -169,7 +169,6 @@ def test_pose_error_oritentation_logic(node, waiter, euler_pose_publish, euler_o
 
     
 
-
 def test_pose_error_oritentation_edge_logic(node, waiter, euler_pose_publish, euler_odom_publish):
     waiter.condition = lambda msg: True
     rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
@@ -180,22 +179,16 @@ def test_pose_error_oritentation_edge_logic(node, waiter, euler_pose_publish, eu
     q = waiter.message[-1]
     assert np.allclose( pose_extraction(q)[3:], [ 0, 0, -1, 0], atol=0.00001)
 
+
 def test_pose_error_oritentation_angle_consistency_logic(node, waiter, euler_pose_publish, euler_odom_publish):
     waiter.condition = lambda msg: True
     rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
     euler_pose_publish.publish([0, 0, 0, 0, 0, 0])
 
-    for i in range(3, 10):
-        euler_odom_publish.publish([1, 1, 1, -np.pi/i, 0, -np.pi/i])
+    for i in range(2, 10):
+        euler_odom_publish.publish([1, 1, 1, np.pi/i, 0, np.pi/i])
         waiter.wait(0.3) # give some time for the waiter to process the received data
         q = waiter.message[-1]
         
-        r, p, y = tf.transformations.euler_from_quaternion(pose_extraction(q)[3:], 'sxyz')
-        assert np.allclose([r, p, y],[np.pi/i, 0,  np.pi/i])
-
-    euler_pose_publish.publish([0, 0, 0, -2, 0, -2])
-    euler_odom_publish.publish([0, 0, 0, 0, 0, 0])
-    waiter.wait(0.5) # give some time for the waiter to process the received data
-    q = waiter.message[-1]
-    r, p, y = tf.transformations.euler_from_quaternion(pose_extraction(q)[3:], 'sxyz')
-    print(r, p, y)
+        r, p, y = tf.transformations.euler_from_quaternion(pose_extraction(q)[3:], 'rxyz')
+        assert np.allclose([r, p, y],[-np.pi/i, 0,  -np.pi/i])

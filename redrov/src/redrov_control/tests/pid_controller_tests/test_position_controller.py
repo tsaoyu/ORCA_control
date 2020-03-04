@@ -51,6 +51,8 @@ def euler_pose_publish():
             pose = PoseStamped()
 
             pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = p[:3]
+            # matrix = tf.transformations.euler_matrix(p[3], p[4], p[5])
+            # q = tf.transformations.quaternion_from_matrix(matrix)
             q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5], 'sxyz')
             pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = q
             for i in range(2):
@@ -70,6 +72,8 @@ def euler_odom_publish():
             odom = Odometry()
 
             odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z = p[:3]
+            # matrix = tf.transformations.euler_matrix(p[3], p[4], p[5])
+            # q = tf.transformations.quaternion_from_matrix(matrix)
             q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5], 'sxyz')
             odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w = q
             for i in range(2):
@@ -119,8 +123,9 @@ def test_can_publish_correct_angualr_cmd_vel(node, waiter, euler_pose_publish, e
     waiter.wait(0.5) # give some time for the waiter to process the received data
 
     twist = twist_extraction(waiter.message[-1])
-
-    assert np.allclose(twist, [-1, -1, -1, -np.pi/4, 0, -np.pi/4])
+    
+    
+    assert np.allclose(twist[3:], [-0.6154, -0.5235, -0.6154], atol=0.01)
 
 def test_can_publish_correct_limited_linear_cmd_vel(node, waiter, euler_pose_publish, euler_odom_publish):
     waiter.condition = lambda msg: True
@@ -143,7 +148,7 @@ def test_can_publish_correct_limited_angular_cmd_vel(node, waiter, euler_pose_pu
 
     twist = twist_extraction(waiter.message[-1])
 
-    assert np.allclose(twist, [0, 0, 0, -3, 0, -3]) # I know Kp from default ros param
+    assert np.allclose(twist, [0, 0, 0, 3, 0, 3]) # I know Kp from default ros param
 
     euler_pose_publish.publish([0, 0, 0, 3, 0, 3])
     euler_odom_publish.publish([0, 0, 0, 0, 0, 0])

@@ -17,6 +17,7 @@ def find_difference(q_mea, q_ref):
     q_error = quaternion_multiply( q_ref, quaternion_inverse(q_mea))
     return q_error
 
+
 q_ref = create_q_ref([0, 0, 0])
 q_mea = create_q_meas([np.pi/4, 0, np.pi/4])
 
@@ -35,9 +36,6 @@ def euler_angles(q_mea, q_ref):
 
     print('_________________________________\n')
 
-euler_angles(create_q_ref([0, 0, 0]), create_q_meas([np.pi/4, 0, np.pi/4]))
-euler_angles(create_q_ref([np.pi/4, 0, 0]), create_q_meas([0, 0, np.pi/4]))
-euler_angles(create_q_ref([1 , 0, 1]), create_q_meas([0, 0, 0]))
 
 def simulation(e_mea_0, e_ref):
     q_ref = create_q_ref(e_ref)
@@ -63,7 +61,6 @@ simulation([0,0,np.pi/2], [0, 0 , 0]) # converge
 simulation([np.pi/4,0,np.pi/4], [0, 0 , 0]) # converge 
 
 simulation([0,0,0], [np.pi/4, 0 , np.pi/4]) #  converge
-
 
 simulation([1,0,0], [np.pi/4, 0 , np.pi/4]) #  converge
 
