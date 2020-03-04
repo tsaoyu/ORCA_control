@@ -6,7 +6,7 @@ import tf
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-
+import yaml
 
 NAME = 'transfomer_tester'
 
@@ -52,11 +52,11 @@ def euler_pose_publish():
             pose = PoseStamped()
 
             pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = p[:3]
-            q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5],  'rxyz')
+            q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5], 'sxyz')
             pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = q
             for i in range(2):
                 self.pub.publish(pose)
-                time.sleep(0.2) # allow some time to let the topic to be published
+                time.sleep(0.1) # allow some time to let the topic to be published
 
     return EulerPosePublisher()
 
@@ -71,17 +71,18 @@ def euler_odom_publish():
             odom = Odometry()
 
             odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z = p[:3]
-            q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5], 'rxyz')
+            q = tf.transformations.quaternion_from_euler(p[3], p[4], p[5], 'sxyz')
             odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w = q
             for i in range(2):
                 self.pub.publish(odom)
-                time.sleep(0.2) # allow some time to let the topic to be published
+                time.sleep(0.1) # allow some time to let the topic to be published
 
     return EulerOdomPublisher()
 
 def pose_extraction(pose_data):
-    pose = PoseStamped(dict(pose))
-    result = pose.pose.position.x, pose.pose.position.y, pose.pose.position.z, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.x  
+    pose = yaml.load(str(pose_data))
+    result = [pose['pose']['position']['x'], pose['pose']['position']['y'], pose['pose']['position']['y'],\
+              pose['pose']['orientation']['x'], pose['pose']['orientation']['y'], pose['pose']['orientation']['z'], pose['pose']['orientation']['w']]  
     return result
 
 def test_can_publish_rpy_pose_and_receive_data(node, waiter, euler_pose_publish):
@@ -118,13 +119,83 @@ def test_publish_right_rpy_pose_data(node, waiter, euler_pose_publish):
     q = waiter.message[-1]
     assert np.allclose( pose_extraction(q), [0, 0, 0, 0, 0, 0, 1])
 
+    euler_pose_publish.publish([0, 0, 0, 0, 0, np.pi/4])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q), [0, 0, 0, 0, 0, 0.383, 0.924], atol=0.01)
+
+    euler_pose_publish.publish([0, 0, 0, 0, np.pi/4, 0])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q), [0, 0, 0, 0, 0.383, 0, 0.924], atol=0.01)
+
+    euler_pose_publish.publish([0, 0, 0, np.pi/4, 0 , 0])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q), [0, 0, 0, 0.383, 0, 0, 0.924], atol=0.01)
+
+    euler_pose_publish.publish([0, 0, 0, np.pi/4, 0 , 0])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q), [0, 0, 0, 0.383, 0, 0, 0.924], atol=0.01)
+
+    euler_pose_publish.publish([0, 0, 0, np.pi/4, np.pi/4 , np.pi/4])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q), [0, 0, 0, 0.1913417, 0.4619398, 0.1913417, 0.8446232], atol=0.00001)
 
 
 def test_pose_error_position_logic(node, waiter, euler_pose_publish, euler_odom_publish):
     waiter.condition = lambda msg: True
     rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
-    euler_pose_publish.publish([0, 0, 0, 0, 0, np.pi/4])
+    euler_pose_publish.publish([0, 0, 0, 0, 0, 0])
     euler_odom_publish.publish([1, 1, 1, 0, 0, np.pi/4])
     waiter.wait(0.5) # give some time for the waiter to process the received data
 
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q)[:3], [-1, -1, -1])
     assert waiter.success 
+
+
+def test_pose_error_oritentation_logic(node, waiter, euler_pose_publish, euler_odom_publish):
+    waiter.condition = lambda msg: True
+    rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
+    euler_pose_publish.publish([0, 0, 0, 0, 0, 0])
+    euler_odom_publish.publish([1, 1, 1, 0, 0, np.pi/4])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q)[3:], [ 0, 0, -0.3826834, 0.9238795], atol=0.00001)
+
+    
+
+
+def test_pose_error_oritentation_edge_logic(node, waiter, euler_pose_publish, euler_odom_publish):
+    waiter.condition = lambda msg: True
+    rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
+    euler_pose_publish.publish([0, 0, 0, 0, 0, 0])
+    euler_odom_publish.publish([1, 1, 1, 0, 0, np.pi])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+
+    q = waiter.message[-1]
+    assert np.allclose( pose_extraction(q)[3:], [ 0, 0, -1, 0], atol=0.00001)
+
+def test_pose_error_oritentation_angle_consistency_logic(node, waiter, euler_pose_publish, euler_odom_publish):
+    waiter.condition = lambda msg: True
+    rospy.Subscriber('/pose_error', PoseStamped, waiter.callback)
+    euler_pose_publish.publish([0, 0, 0, 0, 0, 0])
+
+    for i in range(3, 10):
+        euler_odom_publish.publish([1, 1, 1, -np.pi/i, 0, -np.pi/i])
+        waiter.wait(0.3) # give some time for the waiter to process the received data
+        q = waiter.message[-1]
+        
+        r, p, y = tf.transformations.euler_from_quaternion(pose_extraction(q)[3:], 'sxyz')
+        assert np.allclose([r, p, y],[np.pi/i, 0,  np.pi/i])
+
+    euler_pose_publish.publish([0, 0, 0, -2, 0, -2])
+    euler_odom_publish.publish([0, 0, 0, 0, 0, 0])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+    q = waiter.message[-1]
+    r, p, y = tf.transformations.euler_from_quaternion(pose_extraction(q)[3:], 'sxyz')
+    print(r, p, y)

@@ -107,7 +107,7 @@ class VelocityPIDController:
         for dof in self.dof_names_:
             wrench.append(self.controllers_[dof].output)
 
-        cmd_wrench.force.x, cmd_wrench.force.y, cmd_wrench.force.z, _, _, cmd_wrench.torque.z = wrench
+        cmd_wrench.force.x, cmd_wrench.force.y, cmd_wrench.force.z, cmd_wrench.torque.x, cmd_wrench.torque.y, cmd_wrench.torque.z = wrench
         # Only send x, y, z and yaw to the pixhawk controller
         self.cmd_wrench_publisher.publish(cmd_wrench)
 

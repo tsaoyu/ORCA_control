@@ -22,5 +22,5 @@ if __name__ == '__main__':
     module_path = os.path.join(runner_path, test_module)
 
     sys.exit(
-        pytest.main([module_path, '--junitxml={}'.format(output_file + '.xml'), '--html={}'.format(output_file + '.html')])
+        pytest.main([module_path, '--junitxml={}'.format(output_file + '.xml'), '--html={}'.format(output_file + '.html'), '--self-contained-html'])
     )

@@ -145,6 +145,15 @@ def test_can_publish_correct_limited_angular_cmd_vel(node, waiter, euler_pose_pu
 
     assert np.allclose(twist, [0, 0, 0, -3, 0, -3]) # I know Kp from default ros param
 
+    euler_pose_publish.publish([0, 0, 0, 3, 0, 3])
+    euler_odom_publish.publish([0, 0, 0, 0, 0, 0])
+    waiter.wait(0.5) # give some time for the waiter to process the received data
+
+    twist = twist_extraction(waiter.message[-1])
+
+    assert np.allclose(twist, [0, 0, 0, 3, 0, 3]) # I know Kp from default ros param
+
+
 def test_can_tolerate_yaw_angular_singularity(node, waiter, euler_pose_publish, euler_odom_publish):
     waiter.condition = lambda msg: True
     rospy.Subscriber('/cmd_vel', Twist, waiter.callback)
