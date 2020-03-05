@@ -1,7 +1,6 @@
 import numpy as np
 
-
-def BlueROV2(t, y, tau, print_info=False):
+def BlueROV2Dynamic(t, y, tau, print_info=False):
     W = 112.8
     B = 114.8
 
@@ -82,7 +81,12 @@ def BlueROV2(t, y, tau, print_info=False):
     Dnl = np.diag([Xuu * abs(u), Yvv * abs(v), Zww * abs(w), Kpp * abs(p), Mqq * abs(q), Nrr * abs(r)])
 
     if D < 0:
-        geta = np.zeros(6)
+        geta = np.array( [ W  * sth,
+                         - W  * cth * sphi,
+                         - W  * cth * cphi,
+                           zG * W* cth * sphi,
+                           zG * W * sth,
+                           0   ])
     else:
         geta = np.array([(W - B) * sth,
                          -(W - B) * cth * sphi,

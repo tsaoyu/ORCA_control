@@ -1,0 +1,129 @@
+#!/usr/bin/python
+
+from scipy.integrate import ode
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+import rospy
+import tf
+from geometry_msgs.msg import Wrench
+from std_msgs.msg import Header
+from nav_msgs.msg import Odometry
+from redrov_simulation.propulsion import BlueROV2Input
+from redrov_simulation.rov_dynamics import BlueROV2Dynamic
+
+
+class ROVSimulation:
+
+    def __init__(self):
+        
+        self.sim_history = pd.DataFrame()
+        self.ode = ode(BlueROV2Dynamic).set_integrator('dopri5',max_step = 0.01)
+        self.reset_time()
+        self.sample = []
+        self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))
+
+
+        self.first_received = True
+        rospy.Subscriber('/cmd_wrench', Wrench, self.step_simulation, queue_size=10)
+        self.odom_publisher = rospy.Publisher('/BodyROV01/odom', Odometry, queue_size=10)
+
+    def reset_time(self):
+        self.ode.t = 0
+
+
+    def set_initial_condition(self, y):
+        self.ode.set_initial_value(y, 0)
+        self.current_state = y
+        self.ode.set_f_params(np.array([0, 0, 0, 0, 0, 0]))
+
+
+    def step_simulation(self, wrench_input):
+        if self.first_received:
+            self.reset_time()
+            self.first_received = False
+            self.start_time = rospy.get_time()
+            return
+        
+        ros_time_now = rospy.get_time()
+        t1 = ros_time_now  - self.start_time - self.ode.t
+
+        # print(t1)
+
+        x_command, y_command, z_command = wrench_input.force.x, wrench_input.force.y, wrench_input.force.z
+        yaw_command = wrench_input.torque.z
+        tau = np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
+
+        dt = 0.01
+        while self.ode.successful() and self.ode.t < t1:
+            self.current_state = self.ode.integrate(self.ode.t + dt)
+            self.ode.set_f_params(tau)
+        # print(tau)
+        
+
+        
+    def odom_pub(self):
+        odom = Odometry()
+        h = Header()
+
+        h.frame_id = "qualisys"
+        h.stamp = rospy.Time.now()
+        odom.header = h
+        odom.child_frame_id = "BodyROV01"
+        
+        u, v, w, p, q, r, N, E, D, psi, theta, phi = self.current_state
+        odom.pose.pose.position.x = N
+        odom.pose.pose.position.y = E
+        odom.pose.pose.position.z = D
+
+        quat = tf.transformations.quaternion_from_euler(psi, theta, phi)
+        odom.pose.pose.orientation.x = quat[0]
+        odom.pose.pose.orientation.y = quat[1]
+        odom.pose.pose.orientation.z = quat[2]
+        odom.pose.pose.orientation.w = quat[3]
+
+        odom.twist.twist.linear.x = u
+        odom.twist.twist.linear.y = v
+        odom.twist.twist.linear.z = w
+
+        odom.twist.twist.angular.x = p
+        odom.twist.twist.angular.y = q
+        odom.twist.twist.angular.z = r
+    
+        self.odom_publisher.publish(odom)
+
+
+    def plot_result(self):
+        self.sim_history.plot()
+
+    def plot_forces(self, axis=3, time_range=10):
+        position_names = ['N', 'E', 'D', 'phi', 'theta', 'psi']
+        velocity_names = ['u', 'v', 'w', 'p', 'q', 'r']
+        time = [k['time'] for k in self.sample if k['time'] < time_range]
+        plot_range = len(time)
+        fig, ax = plt.subplots()
+        ax.plot(time, [k['Restoring'][axis] for k in self.sample[:plot_range]], label='Restoring force')
+        ax.plot(time, [k['TotalForce'][axis] for k in self.sample[:plot_range]], label='Total force')
+        ax.plot(time, [k['Damping'][axis] for k in self.sample[:plot_range]], label='Damping')
+        ax.plot(time, [k['Coriolis'][axis] for k in self.sample[:plot_range]], label='Coriolis')
+        ax.plot(time, [k[position_names[axis]] for k in self.sample[:plot_range]], label=position_names[axis])
+        ax.plot(time, [k[velocity_names[axis]] for k in self.sample[:plot_range]], label=velocity_names[axis])
+        ax.set_xlabel('Time (s)')
+        plt.legend()    
+    
+
+
+if __name__ == "__main__":
+
+    rospy.init_node("rov_simulation_node", anonymous = False)
+    rov_sim = ROVSimulation()
+   
+
+    rate = rospy.Rate(100)
+    while not rospy.is_shutdown():
+        try:
+            rov_sim.odom_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
