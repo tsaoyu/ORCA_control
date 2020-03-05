@@ -10,7 +10,7 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
     [u, v, w, p, q, r] = nu
     [N, E, D, phi, theta, psi] = eta
 
-    m = 11.5
+    m = 12
     xG = 0
     yG = 0
     zG = 0.08

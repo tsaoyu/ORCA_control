@@ -19,11 +19,10 @@ class ROVSimulation:
     def __init__(self):
         
         self.sim_history = pd.DataFrame()
-        self.ode = ode(BlueROV2Dynamic).set_integrator('dopri5', max_step = 0.01, nsteps=3000)
+        self.ode = ode(BlueROV2Dynamic).set_integrator('lsoda', max_step = 0.01) #'dopri5', max_step = 0.01 , nsteps=3000)
         self.reset_time()
         self.sample = []
         self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))
-
 
         self.first_received = True
         rospy.Subscriber('/cmd_wrench', Wrench, self.step_simulation, queue_size=10)
@@ -53,13 +52,14 @@ class ROVSimulation:
 
         x_command, y_command, z_command = wrench_input.force.x, wrench_input.force.y, wrench_input.force.z
         yaw_command = wrench_input.torque.z
-        tau = np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
+        tau = - np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
 
         dt = 0.01
         while self.ode.successful() and self.ode.t < t1:
             self.current_state = self.ode.integrate(self.ode.t + dt)
             self.ode.set_f_params(tau)
-        # print(tau)
+        
+        print(tau)
         
 
         

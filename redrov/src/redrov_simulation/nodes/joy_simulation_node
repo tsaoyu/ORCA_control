@@ -22,8 +22,8 @@ class JoyManualControl():
         self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=50)
 
     def read_parameters(self):
-        self.translation_limit = rospy.get_param('/thrust_limits/translation/limit', 400)
-        self.rotation_limit = rospy.get_param('/thrust_limits/rotation/limit', 400)
+        self.translation_limit = rospy.get_param('/thrust_limits/translation/limit', 100)
+        self.rotation_limit = rospy.get_param('/thrust_limits/rotation/limit', 100)
         self.max_trans_effort = rospy.get_param('/thrust_limits/translation/max_effort', 100)
         self.max_rot_effort = rospy.get_param('/thrust_limits/rotation/max_effort', 100)
         self.effort_factor_trans = self.translation_limit / self.max_trans_effort
@@ -32,10 +32,10 @@ class JoyManualControl():
 
     def joy_callback(self, msg):
 
-        self.force_x =   int(msg.axes[1] * self.translation_limit)
-        self.force_y = - int(msg.axes[0] * self.translation_limit)
-        self.force_z =   int(msg.axes[4] * self.translation_limit)
-        self.torque_z =  int(msg.axes[3] * self.rotation_limit)
+        self.force_x =   msg.axes[1] * self.translation_limit
+        self.force_y =   msg.axes[0] * self.translation_limit
+        self.force_z =   msg.axes[4] * self.translation_limit
+        self.torque_z =  msg.axes[3] * self.rotation_limit
 
     def cmd_wrench_pub(self):
         w = Wrench()
