@@ -4,6 +4,10 @@
 
 High quality ROS package for underwater robotics control and navigation.
 
+## Quality assurance
+
+![](https://github.com/tsaoyu/ORCA_control/workflows/CI/badge.svg)
+
 ## Disciplines
 
 Never write shit code and do shit things.
