@@ -19,7 +19,8 @@ class ROVSimulation:
     def __init__(self):
         
         self.sim_history = pd.DataFrame()
-        self.ode = ode(BlueROV2Dynamic).set_integrator('lsoda', max_step = 0.01) #'dopri5', max_step = 0.01 , nsteps=3000)
+        self.ode = ode(BlueROV2Dynamic).set_integrator('dopri5', max_step = 0.01 , nsteps=5000)
+        #self.ode = ode(BlueROV2Dynamic).set_integrator('lsoda', max_step = 0.01) #'dopri5', max_step = 0.01 , nsteps=3000)
         self.reset_time()
         self.sample = []
         self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))
@@ -54,12 +55,13 @@ class ROVSimulation:
         yaw_command = wrench_input.torque.z
         tau = - np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
 
-        dt = 0.01
-        while self.ode.successful() and self.ode.t < t1:
-            self.current_state = self.ode.integrate(self.ode.t + dt)
-            self.ode.set_f_params(tau)
-        
-        print(tau)
+        # dt = 0.001
+        # while self.ode.successful() and self.ode.t < t1:
+        #     self.current_state = self.ode.integrate(self.ode.t + dt)
+        #     self.ode.set_f_params(tau)
+        self.current_state = self.ode.integrate(self.ode.t + t1)
+        self.ode.set_f_params(tau)
+        #print(tau)
         
 
         

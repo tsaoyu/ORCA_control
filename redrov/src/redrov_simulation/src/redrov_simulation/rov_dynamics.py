@@ -1,9 +1,13 @@
+from __future__ import division
 import numpy as np
+
+W = 112.8
+B = 114.8
 
 m = 11.2
 xG = 0
 yG = 0
-zG = 0.08
+zG = 0.1
 Ix = 0.16
 Ixy = 0
 Ixz = 0
@@ -18,8 +22,8 @@ Xudot = 5.5  # Abir 2.6
 Yvdot = 12.7  # 18.5
 Zwdot = 14.57
 Kpdot = 0.12
-Mqdot = 0.12
-Nrdot = 0.12
+Mqdot = 0.20
+Nrdot = 0.24
 
 Xu = 4.03
 Xuu = 18.18  # Abir Xu = 0;    Xuu = 34.96;
@@ -27,31 +31,29 @@ Yv = 6.22
 Yvv = 21.66  # Yv = 0.26; Yvv = 103.25;
 Zw = 5.18
 Zww = 36.99
-Kp = 0.07
-Kpp = 1.55
-Mq = 0.07
-Mqq = 1.55
-Nr = 0.07
-Nrr = 1.55 # Nr = 4.64; Nrr = 0.43;
+Kp = 3.07
+Kpp = 0.45
+Mq = 3.07
+Mqq = 0.45
+Nr = 4.64
+Nrr = 0.43 # Nr = 4.64; Nrr = 0.43;
 
 Mrb = np.array([[m, 0, 0, 0, m * zG, -m * yG],
-                    [0, m, 0, -m * zG, 0, m * xG],
-                    [0, 0, m, m * yG, -m * xG, 0],
-                    [0, -m * zG, m * yG, Ix, -Ixy, -Ixz],
-                    [m * zG, 0, -m * xG, -Iyx, Iy, -Iyz],
-                    [-m * yG, m * xG, 0, -Izx, -Izy, Iz]])
+                [0, m, 0, -m * zG, 0, m * xG],
+                [0, 0, m, m * yG, -m * xG, 0],
+                [0, -m * zG, m * yG, Ix, -Ixy, -Ixz],
+                [m * zG, 0, -m * xG, -Iyx, Iy, -Iyz],
+                [-m * yG, m * xG, 0, -Izx, -Izy, Iz]])
 
 Ma = np.diag([Xudot, Yvdot, Zwdot, Kpdot, Mqdot, Nrdot])
 
 M = Mrb + Ma
 inM = np.linalg.inv(M)
 
-
-
-
+print(M)
+print(inM)
 def BlueROV2Dynamic(t, y, tau, print_info=False):
-    W = 112.8
-    B = 114.8
+   
 
     # Unpack states
     nu = y[:6]
@@ -94,11 +96,11 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                            zG * W * sth,
                            0   ])
     else:
-        geta = np.array([(W - B) * sth,
+        geta = np.array([ (W - B) * sth,
                          -(W - B) * cth * sphi,
                          -(W - B) * cth * cphi,
-                         zG * W * cth * sphi,
-                         zG * W * sth,
+                          zG * W * cth * sphi,
+                          zG * W * sth,
                          0])
 
     nudot = inM.dot(tau - (Crb + Ca).dot(nu) - (Dnu + Dnl).dot(nu) - geta)
@@ -109,7 +111,7 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                   [0, 0, 0, 1, sphi * sth / cth, cphi * sth / cth],
                   [0, 0, 0, 0, cphi, -sphi],
                   [0, 0, 0, 0, sphi / cth, cphi / cth]])
-
+    #print(inM.dot(- (Crb + Ca).dot(nu) - (Dnu + Dnl).dot(nu) - geta))
     etadot = J.dot(nu)
 
     if print_info:
