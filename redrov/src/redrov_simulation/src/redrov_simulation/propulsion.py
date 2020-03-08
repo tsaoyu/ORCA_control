@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 
 allocation_matrix = np.array([[-1,  1,  0,  -1],

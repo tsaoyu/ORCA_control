@@ -20,7 +20,6 @@ class ROVSimulation:
         
         self.sim_history = pd.DataFrame()
         self.ode = ode(BlueROV2Dynamic).set_integrator('dopri5', max_step = 0.01 , nsteps=5000)
-        #self.ode = ode(BlueROV2Dynamic).set_integrator('lsoda', max_step = 0.01) #'dopri5', max_step = 0.01 , nsteps=3000)
         self.reset_time()
         self.sample = []
         self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))
@@ -32,12 +31,10 @@ class ROVSimulation:
     def reset_time(self):
         self.ode.t = 0
 
-
     def set_initial_condition(self, y):
         self.ode.set_initial_value(y, 0)
         self.current_state = y
         self.ode.set_f_params(np.array([0, 0, 0, 0, 0, 0]))
-
 
     def step_simulation(self, wrench_input):
         if self.first_received:
@@ -49,16 +46,10 @@ class ROVSimulation:
         ros_time_now = rospy.get_time()
         t1 = ros_time_now  - self.start_time - self.ode.t
 
-        # print(t1)
-
         x_command, y_command, z_command = wrench_input.force.x, wrench_input.force.y, wrench_input.force.z
         yaw_command = wrench_input.torque.z
         tau = - np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
 
-        # dt = 0.001
-        # while self.ode.successful() and self.ode.t < t1:
-        #     self.current_state = self.ode.integrate(self.ode.t + dt)
-        #     self.ode.set_f_params(tau)
         self.current_state = self.ode.integrate(self.ode.t + t1)
         self.ode.set_f_params(tau)
         #print(tau)

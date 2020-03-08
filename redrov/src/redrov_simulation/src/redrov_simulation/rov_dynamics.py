@@ -54,7 +54,6 @@ print(M)
 print(inM)
 def BlueROV2Dynamic(t, y, tau, print_info=False):
    
-
     # Unpack states
     nu = y[:6]
     eta = y[6:]
@@ -70,9 +69,9 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
     sth = np.sin(theta)
 
 
-    Crb = np.array([[0, 0, 0, 0, m * w, -m * v],
+    Crb = np.array([[0, 0, 0,  0, m * w, -m * v],
                     [0, 0, 0, -m * w, 0, m * u],
-                    [0, 0, 0, m * v, -m * u, 0],
+                    [0, 0, 0,  m * v, -m * u, 0],
                     [0, m * w, -m * v, 0, Iz * r, -Iy * q],
                     [-m * w, 0, m * u, -Iz * r, 0, Ix * p],
                     [m * v, -m * u, 0, Iy * q, -Ix * p, 0]])
@@ -92,7 +91,7 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
         geta = np.array( [ W  * sth,
                          - W  * cth * sphi,
                          - W  * cth * cphi,
-                           zG * W* cth * sphi,
+                           zG * W * cth * sphi,
                            zG * W * sth,
                            0   ])
     else:
@@ -101,7 +100,7 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                          -(W - B) * cth * cphi,
                           zG * W * cth * sphi,
                           zG * W * sth,
-                         0])
+                          0])
 
     nudot = inM.dot(tau - (Crb + Ca).dot(nu) - (Dnu + Dnl).dot(nu) - geta)
 

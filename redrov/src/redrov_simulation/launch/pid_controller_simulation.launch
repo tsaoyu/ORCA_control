@@ -1,0 +1,11 @@
+<launch>
+
+    <node pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
+    
+    <rosparam file="$(find redrov_control)/config/pid_controller/pid_controller_master.yaml" />
+    <node name="body_position_error_transformer_node" pkg="redrov_control" type="body_position_error_transformer_node" output="screen"/>
+    <node name="position_pid_controller" pkg="redrov_control" type="position_pid_controller_node" output="screen"/>
+    <node name="velocity_pid_controller" pkg="redrov_control" type="velocity_pid_controller_node" output="screen"/>
+
+    <node pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
+</launch>
