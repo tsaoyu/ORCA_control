@@ -22,8 +22,8 @@ class JoyManualControl():
         self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=50)
 
     def read_parameters(self):
-        self.translation_limit = rospy.get_param('/thrust_limits/translation/limit', 20)
-        self.rotation_limit = rospy.get_param('/thrust_limits/rotation/limit', 20)
+        self.translation_limit = rospy.get_param('/thrust_limits/translation/limit', 100)
+        self.rotation_limit = rospy.get_param('/thrust_limits/rotation/limit', 100)
         self.max_trans_effort = rospy.get_param('/thrust_limits/translation/max_effort', 100)
         self.max_rot_effort = rospy.get_param('/thrust_limits/rotation/max_effort', 100)
         self.effort_factor_trans = self.translation_limit / self.max_trans_effort

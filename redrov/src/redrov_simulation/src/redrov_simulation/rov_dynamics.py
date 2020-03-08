@@ -7,7 +7,7 @@ B = 114.8
 m = 11.2
 xG = 0
 yG = 0
-zG = 0.1
+zG = 0.08
 Ix = 0.16
 Ixy = 0
 Ixz = 0
@@ -74,11 +74,11 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                     [0, 0, 0, -m * w, 0, m * u],
                     [0, 0, 0, m * v, -m * u, 0],
                     [0, m * w, -m * v, 0, Iz * r, -Iy * q],
-                    [-m * v, 0, m * u, -Iz * r, 0, Ix * p],
+                    [-m * w, 0, m * u, -Iz * r, 0, Ix * p],
                     [m * v, -m * u, 0, Iy * q, -Ix * p, 0]])
 
-    Ca = np.array([[0, 0, 0, 0, Zwdot * w, 0],
-                   [0, 0, 0, -Zwdot * w, 0, -Xudot * u],
+    Ca = np.array([[0, 0, 0, 0, - Zwdot * w, 0],
+                   [0, 0, 0, Zwdot * w, 0, -Xudot * u],
                    [0, 0, 0, -Yvdot * v, Xudot * u, 0],
                    [0, -Zwdot * w, Yvdot * v, 0, -Nrdot * r, Mqdot * q],
                    [Zwdot * w, 0, -Xudot * u, Nrdot * r, 0, -Kpdot * p],
@@ -112,6 +112,7 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                   [0, 0, 0, 0, cphi, -sphi],
                   [0, 0, 0, 0, sphi / cth, cphi / cth]])
     #print(inM.dot(- (Crb + Ca).dot(nu) - (Dnu + Dnl).dot(nu) - geta))
+    #print(inM.dot((Crb + Ca).dot(nu)))
     etadot = J.dot(nu)
 
     if print_info:
