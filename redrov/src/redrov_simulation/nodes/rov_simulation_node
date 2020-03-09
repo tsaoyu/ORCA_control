@@ -19,7 +19,7 @@ class ROVSimulation:
     def __init__(self):
         
         self.sim_history = pd.DataFrame()
-        self.ode = ode(BlueROV2Dynamic).set_integrator('dopri5', max_step = 0.01 , nsteps=5000)
+        self.ode = ode(BlueROV2Dynamic).set_integrator('dop853', max_step = 0.01 , nsteps=5000)
         self.reset_time()
         self.sample = []
         self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))

@@ -35,7 +35,7 @@ class JoyManualControl():
         self.force_x =   msg.axes[1] * self.translation_limit
         self.force_y =  -msg.axes[0] * self.translation_limit
         self.force_z =   msg.axes[4] * self.translation_limit
-        self.torque_z =  msg.axes[3] * self.rotation_limit
+        self.torque_z = -msg.axes[3] * self.rotation_limit
 
     def cmd_wrench_pub(self):
         w = Wrench()

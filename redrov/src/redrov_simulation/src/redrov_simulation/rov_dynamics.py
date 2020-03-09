@@ -110,8 +110,8 @@ def BlueROV2Dynamic(t, y, tau, print_info=False):
                   [0, 0, 0, 1, sphi * sth / cth, cphi * sth / cth],
                   [0, 0, 0, 0, cphi, -sphi],
                   [0, 0, 0, 0, sphi / cth, cphi / cth]])
-    #print(inM.dot(- (Crb + Ca).dot(nu) - (Dnu + Dnl).dot(nu) - geta))
-    #print(inM.dot((Crb + Ca).dot(nu)))
+
+
     etadot = J.dot(nu)
 
     if print_info:
