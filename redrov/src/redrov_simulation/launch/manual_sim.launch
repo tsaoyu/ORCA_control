@@ -13,4 +13,6 @@
     <node pkg="redrov_simulation" name="joy_simulation_node" type="joy_simulation_node" output="screen"/>
     <node pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
     <node pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
+  
+    <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch" />
 </launch>

@@ -8,4 +8,5 @@
     <node name="velocity_pid_controller" pkg="redrov_control" type="velocity_pid_controller_node" output="screen"/>
 
     <node pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
+    <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch" />
 </launch>
