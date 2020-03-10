@@ -23,7 +23,7 @@ if __name__ == '__main__':
         
             static_tf_0.transform.translation.x = 0
             static_tf_0.transform.translation.y = 0
-            static_tf_0.transform.translation.z = 0
+            static_tf_0.transform.translation.z = 10
         
             quat = tf.transformations.quaternion_from_euler(math.pi, 0, 0)
             static_tf_0.transform.rotation.x = quat[0]
@@ -41,27 +41,27 @@ if __name__ == '__main__':
             static_tf_1.transform.translation.z = 0
         
             quat_1 = tf.transformations.quaternion_from_euler(0, 0, 0)
-            static_tf_1.transform.rotation.x = quat[0]
-            static_tf_1.transform.rotation.y = quat[1]
-            static_tf_1.transform.rotation.z = quat[2]
-            static_tf_1.transform.rotation.w = quat[3]
+            static_tf_1.transform.rotation.x = quat_1[0]
+            static_tf_1.transform.rotation.y = quat_1[1]
+            static_tf_1.transform.rotation.z = quat_1[2]
+            static_tf_1.transform.rotation.w = quat_1[3]
 
-            # Creating transform from "BodyROV01" to "base_link"
-            static_tf_2.header.stamp = rospy.Time.now()
-            static_tf_2.header.frame_id = "BodyROV01"
-            static_tf_2.child_frame_id = "base_link"
+            # # Creating transform from "BodyROV01" to "base_link"
+            # static_tf_2.header.stamp = rospy.Time.now()
+            # static_tf_2.header.frame_id = "BodyROV01"
+            # static_tf_2.child_frame_id = "base_link"
         
-            static_tf_2.transform.translation.x = 0
-            static_tf_2.transform.translation.y = 0
-            static_tf_2.transform.translation.z = 0
+            # static_tf_2.transform.translation.x = 0
+            # static_tf_2.transform.translation.y = 0
+            # static_tf_2.transform.translation.z = 0
         
-            quat_2 = tf.transformations.quaternion_from_euler(0, 0, 0)
-            static_tf_2.transform.rotation.x = quat[0]
-            static_tf_2.transform.rotation.y = quat[1]
-            static_tf_2.transform.rotation.z = quat[2]
-            static_tf_2.transform.rotation.w = quat[3]
+            # quat_2 = tf.transformations.quaternion_from_euler(0, 0, 0)
+            # static_tf_2.transform.rotation.x = quat[0]
+            # static_tf_2.transform.rotation.y = quat[1]
+            # static_tf_2.transform.rotation.z = quat[2]
+            # static_tf_2.transform.rotation.w = quat[3]
 
-            broadcaster0.sendTransform([static_tf_0, static_tf_1, static_tf_2])
+            broadcaster0.sendTransform([static_tf_0, static_tf_1])
 
 
         except rospy.ROSInterruptException:
