@@ -22,7 +22,7 @@ class ROVSimulation:
         self.ode = ode(BlueROV2Dynamic).set_integrator('dop853', max_step = 0.01 , nsteps=5000)
         self.reset_time()
         self.sample = []
-        self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0]))
+        self.set_initial_condition(np.array([0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0]))
 
         self.first_received = True
         rospy.Subscriber('/cmd_wrench', Wrench, self.step_simulation, queue_size=10)
