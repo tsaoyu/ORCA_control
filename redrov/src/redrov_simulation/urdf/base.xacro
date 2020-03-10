@@ -96,10 +96,10 @@
     <xacro:insert_block name="gazebo"/>
 
     <!-- Include the actuators modules: Thrusters, Beacon -->
-    <xacro:include filename="$(find redrov_simulation)/urdf/actuators.xacro" />
+    <!-- <xacro:include filename="$(find redrov_simulation)/urdf/actuators.xacro" /> -->
 
     <!-- Include the sensor modules: 3D Pose, IMU, Pressure, Camera -->
-    <xacro:include filename="$(find redrov_simulation)/urdf/sensors.xacro"/>
+    <!-- <xacro:include filename="$(find redrov_simulation)/urdf/sensors.xacro"/> -->
 
   </xacro:macro>
 </robot>
