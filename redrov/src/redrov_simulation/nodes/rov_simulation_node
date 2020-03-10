@@ -52,9 +52,7 @@ class ROVSimulation:
 
         self.current_state = self.ode.integrate(self.ode.t + t1)
         self.ode.set_f_params(tau)
-        #print(tau)
-        
-
+     
         
     def odom_pub(self):
         odom = Odometry()
