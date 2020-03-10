@@ -8,8 +8,8 @@ project(redrov_control)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ct_core
-  ct_optcon
+  # ct_core
+  # ct_optcon
   roscpp
   rospy
   std_msgs
@@ -109,9 +109,10 @@ generate_dynamic_reconfigure_options(
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES redrov_control
-   CATKIN_DEPENDS ct_core ct_optcon roscpp rospy std_msgs
-#  DEPENDS system_lib
-)
+   CATKIN_DEPENDS roscpp rospy std_msgs
+   # ct_core ct_optcon
+   # DEPENDS system_lib
+) 
 
 ###########
 ## Build ##
