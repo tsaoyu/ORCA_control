@@ -87,25 +87,6 @@ class ROVSimulation:
         self.odom_publisher.publish(odom)
 
 
-    def plot_result(self):
-        self.sim_history.plot()
-
-    def plot_forces(self, axis=3, time_range=10):
-        position_names = ['N', 'E', 'D', 'phi', 'theta', 'psi']
-        velocity_names = ['u', 'v', 'w', 'p', 'q', 'r']
-        time = [k['time'] for k in self.sample if k['time'] < time_range]
-        plot_range = len(time)
-        fig, ax = plt.subplots()
-        ax.plot(time, [k['Restoring'][axis] for k in self.sample[:plot_range]], label='Restoring force')
-        ax.plot(time, [k['TotalForce'][axis] for k in self.sample[:plot_range]], label='Total force')
-        ax.plot(time, [k['Damping'][axis] for k in self.sample[:plot_range]], label='Damping')
-        ax.plot(time, [k['Coriolis'][axis] for k in self.sample[:plot_range]], label='Coriolis')
-        ax.plot(time, [k[position_names[axis]] for k in self.sample[:plot_range]], label=position_names[axis])
-        ax.plot(time, [k[velocity_names[axis]] for k in self.sample[:plot_range]], label=velocity_names[axis])
-        ax.set_xlabel('Time (s)')
-        plt.legend()    
-    
-
 
 if __name__ == "__main__":
 
