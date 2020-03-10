@@ -50,8 +50,6 @@ Ma = np.diag([Xudot, Yvdot, Zwdot, Kpdot, Mqdot, Nrdot])
 M = Mrb + Ma
 inM = np.linalg.inv(M)
 
-print(M)
-print(inM)
 def BlueROV2Dynamic(t, y, tau, print_info=False):
    
     # Unpack states
