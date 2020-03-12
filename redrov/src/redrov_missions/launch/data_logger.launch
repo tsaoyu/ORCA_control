@@ -1,11 +1,14 @@
 <launch>
 
+<arg name="TOP_NAME" default="yu"/>
+<arg name="ROV_NAME" default="laodi"/>
+
 <node machine="top" pkg="rosbag" type="record" name="rosbag_record_top"
-            args="record -ao /home/nelson/ORCA/rosbags/TOP.bag"
+            args="record -ao /home/$(arg TOP_NAME)/ORCA/rosbags/TOP.bag"
             />
 
 <node machine="rov" pkg="rosbag" type="record" name="rosbag_record_rov"
-            args="record -ao  /home/jetson/ORCA/rosbags/ROV.bag"
+            args="record -ao  /home/$(arg ROV_NAME)/ORCA/rosbags/ROV.bag"
             />
 
 </launch>

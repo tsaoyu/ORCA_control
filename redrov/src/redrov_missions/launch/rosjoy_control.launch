@@ -1,7 +1,9 @@
 <launch>
+    <arg name="TOP_NAME" default="yu"/>
+    <arg name="ROV_NAME" default="laodi"/>
 
-    <machine name="top" address="192.168.2.1" user="nelson" env-loader="/home/nelson/ORCA_control/redrov/src/redrov_missions/scripts/top_setup.bash"/>
-    <machine name="rov" address="192.168.2.2" user="jetson" env-loader="/home/jetson/ORCA_control/redrov/src/redrov_missions/scripts/rov_setup.bash"/>
+    <machine name="top" address="192.168.2.1" user="$(arg TOP_NAME)" env-loader="/home/$(arg TOP_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg TOP_NAME)_setup.bash"/>
+    <machine name="rov" address="192.168.2.2" user="$(arg ROV_NAME)" env-loader="/home/$(arg ROV_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg ROV_NAME)_setup.bash"/>
 
     <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
