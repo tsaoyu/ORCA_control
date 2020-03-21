@@ -34,7 +34,7 @@ Require full ROS network setting and real hardware. -->
 
     <node machine="top" pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
     <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
-    <node machine="top" pkg="redrov_simulation" name="upload_bluerov2_model" type="upload_bluerov2_remote" output="screen">
+    <node machine="top" pkg="redrov_simulation" name="upload_bluerov2_model" type="upload_bluerov2_remote" output="screen"/>
 
 
 </launch>
