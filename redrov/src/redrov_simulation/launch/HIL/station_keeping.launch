@@ -32,10 +32,10 @@ Require full ROS network setting and real hardware. -->
     <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
     
     <group>
-        <machine name="top" address="192.168.2.1" default="true" />
+        <machine name="top_HIL" address="192.168.2.1" default="true" />
         <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch" />
     </group>
-
+S
 
     <!-- Logging -->
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
