@@ -9,6 +9,10 @@ Require full ROS network setting and real hardware. -->
     <machine name="top" address="192.168.2.1" user="$(arg TOP_NAME)" env-loader="/home/$(arg TOP_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg TOP_NAME)_setup.bash"/>
     <machine name="rov" address="192.168.2.2" user="$(arg ROV_NAME)" env-loader="/home/$(arg ROV_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg ROV_NAME)_setup.bash"/>
 
+    <!-- Logging -->
+    <include file="$(find redrov_missions)/launch/data_logger.launch" />
+
+
     <!-- Hardware -->
     <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
 
@@ -27,7 +31,7 @@ Require full ROS network setting and real hardware. -->
 
 
     <!-- Simulation loop -->
-    <node  machine="top" pkg="redrov_simulation" name="joy_simulation_node" type="joy_simulation_node" output="screen"/>
+    <node machine="top" pkg="redrov_simulation" name="joy_simulation_node" type="joy_simulation_node" output="screen"/>
     <node machine="top" pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
     <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
     
@@ -35,9 +39,6 @@ Require full ROS network setting and real hardware. -->
         <machine name="top_HIL" address="192.168.2.1" default="true" />
         <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch" />
     </group>
-S
 
-    <!-- Logging -->
-    <include file="$(find redrov_missions)/launch/data_logger.launch" />
 
 </launch>
