@@ -49,7 +49,6 @@ Require full ROS network setting and real hardware. -->
 
 
 
-
     <!-- Visulisation -->
 
     <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
