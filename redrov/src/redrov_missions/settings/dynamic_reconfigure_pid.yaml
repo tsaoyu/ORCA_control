@@ -1,0 +1,137 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        dictitems:
+          velocity_controller: !!python/object/new:dynamic_reconfigure.encoding.Config
+            dictitems:
+              groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                dictitems:
+                  heave: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      heave_kd: 0.0
+                      heave_ki: 0.5
+                      heave_kp: 1.0
+                      id: 4
+                      name: heave
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      state: true
+                      type: ''
+                    state: []
+                  pitch: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      id: 6
+                      name: pitch
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      pitch_kd: 0.0
+                      pitch_ki: 0.0
+                      pitch_kp: 1.0
+                      state: true
+                      type: ''
+                    state: []
+                  roll: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      id: 5
+                      name: roll
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      roll_kd: 0.0
+                      roll_ki: 0.0
+                      roll_kp: 1.0
+                      state: true
+                      type: ''
+                    state: []
+                  surge: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      id: 2
+                      name: surge
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      state: true
+                      surge_kd: 0.0
+                      surge_ki: 0.0
+                      surge_kp: 1.0
+                      type: ''
+                    state: []
+                  sway: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      id: 3
+                      name: sway
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      state: true
+                      sway_kd: 0.0
+                      sway_ki: 0.0
+                      sway_kp: 1.0
+                      type: ''
+                    state: []
+                  yaw: !!python/object/new:dynamic_reconfigure.encoding.Config
+                    dictitems:
+                      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      id: 7
+                      name: yaw
+                      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                        state: []
+                      parent: 1
+                      state: true
+                      type: ''
+                      yaw_kd: 0.0
+                      yaw_ki: 0.0
+                      yaw_kp: 1.0
+                    state: []
+                state: []
+              id: 1
+              name: velocity_controller
+              parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+                state: []
+              parent: 0
+              state: true
+              type: ''
+            state: []
+        state: []
+      id: 0
+      name: Default
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+    state: []
+  heave_kd: 0.0
+  heave_ki: 0.5
+  heave_kp: 1.0
+  pitch_kd: 0.0
+  pitch_ki: 0.0
+  pitch_kp: 1.0
+  roll_kd: 0.0
+  roll_ki: 0.0
+  roll_kp: 1.0
+  surge_kd: 0.0
+  surge_ki: 0.0
+  surge_kp: 1.0
+  sway_kd: 0.0
+  sway_ki: 0.0
+  sway_kp: 1.0
+  yaw_kd: 0.0
+  yaw_ki: 0.0
+  yaw_kp: 1.0
+state: []
