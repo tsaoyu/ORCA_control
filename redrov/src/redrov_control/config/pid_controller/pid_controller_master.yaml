@@ -1,6 +1,6 @@
 velocity_controllers:
   surge:
-    Kp: 1
+    Kp: 20
     Ki: 0
     Kd: 0
     upper_limit: 100
@@ -14,7 +14,7 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/surge
 
   sway:
-    Kp: 1
+    Kp: 20
     Ki: 0
     Kd: 0
     upper_limit: 100
@@ -28,7 +28,7 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/sway
 
   heave:
-    Kp: 1
+    Kp: 40
     Ki: 0
     Kd: 0
     upper_limit: 100
@@ -70,7 +70,7 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/pitch
 
   yaw:
-    Kp: 1
+    Kp: 30
     Ki: 0
     Kd: 0
     upper_limit: 100
@@ -115,7 +115,7 @@ position_controllers:
 
   z:
     Kp: 1
-    Ki: 0
+    Ki: 0.5
     Kd: 0
     upper_limit: 1
     lower_limit: -1
