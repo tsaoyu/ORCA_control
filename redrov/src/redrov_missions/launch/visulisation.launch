@@ -1,0 +1,7 @@
+<launch>
+
+    <node pkg="rqt" name="rqt_gui" type="rqt" />
+    <node pkg="rviz" name="rviz_gui" type="rviz"/>
+
+</launch>
+
