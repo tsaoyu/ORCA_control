@@ -1,0 +1,62 @@
+<launch>
+<!-- This is the station keeping HIL launch file.
+Require full ROS network setting and real hardware. -->
+
+    <arg name="TOP_NAME" default="yu"/> 
+    <arg name="ROV_NAME" default="laodi"/>
+    <!-- can be overwritten by env variables -->
+
+    <machine name="top" address="192.168.2.1" user="$(arg TOP_NAME)" env-loader="/home/$(arg TOP_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg TOP_NAME)_setup.bash"/>
+    <machine name="rov" address="192.168.2.2" user="$(arg ROV_NAME)" env-loader="/home/$(arg ROV_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg ROV_NAME)_setup.bash"/>
+
+    <!-- Logging -->
+    <include file="$(find redrov_missions)/launch/data_logger.launch" />
+
+
+    <!-- Hardware -->
+    <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
+
+    <node machine="top" pkg="joy" name="joy" type="joy_node">
+        <param name="coalesce_interval" value="0.002"/>
+        <param name="autorepeat_rate" value="50"/>
+    </node>
+
+    <node machine="top" pkg="qualisys"
+    type="qualisys_node"
+    name="qualisys">
+        <param name="server_address" value="192.168.1.51"/>
+        <param name="base_port" value="22222"/>
+        <param name="publish_tf" value="true"/>
+    </node>
+
+    <arg name="model" default="BodyROV01"/>
+
+    <node machine="top" pkg="qualisys" type="qualisys_odom_node" name="$(arg model)">
+        <param name="qualisys_fps" type="double" value="128"/>
+        <remap from="~qualisys_subject" to="/qualisys/$(arg model)"/>
+    </node>
+
+
+    <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
+    <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node" output="screen"/>
+    
+
+    <!-- Control -->
+    <rosparam file="$(find redrov_control)/config/pid_controller/pid_controller_master.yaml" />
+    <node machine="rov" name="body_position_error_transformer_node" pkg="redrov_control" type="body_position_error_transformer_node" output="screen"/>
+    <node machine="rov" name="position_pid_controller" pkg="redrov_control" type="position_pid_controller_node" output="screen"/>
+    <node machine="rov" name="velocity_pid_controller" pkg="redrov_control" type="velocity_pid_controller_node" output="screen"/>
+
+
+
+
+    <!-- Visulisation -->
+
+    <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
+
+    <group>
+        <machine name="top_HIL" address="192.168.2.1" user="$(arg TOP_NAME)" default="true"/>
+        <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch"/>
+    </group>
+
+</launch>
