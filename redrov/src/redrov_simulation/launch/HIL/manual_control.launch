@@ -28,11 +28,14 @@ Require full ROS network setting and real hardware. -->
     <!-- Control loop -->
     <node machine="rov" name="body_position_error_transformer_node" pkg="redrov_control" type="body_position_error_transformer_node" output="screen"/>
     
-    
+
     <!-- Simulation loop -->
 
     <node machine="top" pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
     <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
-
+    <group>
+        <machine name="top_HIL" address="192.168.2.1" user="$(arg TOP_NAME)" default="true"/>
+        <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch"/>
+    </group>
 
 </launch>
