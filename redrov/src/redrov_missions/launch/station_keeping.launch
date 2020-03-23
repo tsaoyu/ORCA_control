@@ -21,7 +21,18 @@ Require full ROS network setting and real hardware. -->
         <param name="autorepeat_rate" value="50"/>
     </node>
 
-    <node machine="top" pkg="qualisys" type="qualisys_node" name="qualisys" output="screen">
+    <node machine="top" pkg="mocap_qualisys" type="mocap_qualisys_node" name="qualisys" output="screen">
+        <param name="server_address" value="192.168.1.51"/>
+        <param name="server_base_port" value="22222"/>
+        <param name="frame_rate" value="100"/>
+        <param name="max_accel" value="3"/>
+        <param name="publish_tf" value="true"/>
+        <param name="fixed_frame_id" value="world"/>
+        <rosparam param="model_list">"[BodyROV01]"</rosparam>
+        <remap from="qualisys/BodyROV01/odom" to="/BodyROV01/odom"/>
+    </node>
+
+    <!-- <node machine="top" pkg="qualisys" type="qualisys_node" name="qualisys" output="screen">
         <param name="server_address" value="192.168.1.51"/>
         <param name="base_port" value="22222"/>
         <param name="publish_tf" value="true"/>
@@ -32,7 +43,7 @@ Require full ROS network setting and real hardware. -->
     <node machine="top" pkg="qualisys" type="qualisys_odom_node" name="$(arg model)">
         <param name="qualisys_fps" type="double" value="128"/>
         <remap from="~qualisys_subject" to="/qualisys/$(arg model)"/>
-    </node>
+    </node> -->
 
 
     <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
