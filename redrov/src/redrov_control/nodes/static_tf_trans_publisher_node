@@ -23,7 +23,7 @@ if __name__ == '__main__':
         
             static_tf_0.transform.translation.x = 0
             static_tf_0.transform.translation.y = 0
-            static_tf_0.transform.translation.z = 10
+            static_tf_0.transform.translation.z = 3
         
             quat = tf.transformations.quaternion_from_euler(math.pi, 0, 0)
             static_tf_0.transform.rotation.x = quat[0]
