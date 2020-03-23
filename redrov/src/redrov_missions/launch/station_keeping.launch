@@ -21,9 +21,7 @@ Require full ROS network setting and real hardware. -->
         <param name="autorepeat_rate" value="50"/>
     </node>
 
-    <node machine="top" pkg="qualisys"
-    type="qualisys_node"
-    name="qualisys">
+    <node machine="top" pkg="qualisys" type="qualisys_node" name="qualisys" output="screen">
         <param name="server_address" value="192.168.1.51"/>
         <param name="base_port" value="22222"/>
         <param name="publish_tf" value="true"/>
