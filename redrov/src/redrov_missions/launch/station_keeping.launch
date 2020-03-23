@@ -37,7 +37,7 @@ Require full ROS network setting and real hardware. -->
 
     <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
     <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node" output="screen"/>
-    
+    <include file="$(find ping360_sonar)/launch/example.launch" />
 
     <!-- Control -->
     <rosparam file="$(find redrov_control)/config/pid_controller/pid_controller_master.yaml" />
