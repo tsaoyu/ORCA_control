@@ -119,7 +119,7 @@ class JoyManualControl():
 
             self.force_x = 1500 + int(self.effort_factor_trans * x)
             self.force_y = 1500 + int(self.effort_factor_trans * y)
-            self.force_z = 1500 + int(self.effort_factor_trans * z)
+            self.force_z = 1500 - int(self.effort_factor_trans * z)
             self.torque_z = 1500 + int(self.effort_factor_rot * r_z)
 
 
