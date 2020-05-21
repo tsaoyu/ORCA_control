@@ -17,6 +17,7 @@ class PositionPIDController:
         self.para_names_ = ["kp", "ki", "kd"]
         self.setup_subs()
         self.setup_pubs()
+        self.pose_ref_published = False
 
         self.get_control_params()
         self.controllers_ = {}
@@ -82,6 +83,9 @@ class PositionPIDController:
 
 
     def pose_callback(self, msg):
+        if self.pose_ref_published == False:
+            self.pose_ref_published = True
+
         error_quaternion = np.array([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
         r, p, y = tf.transformations.euler_from_quaternion(error_quaternion, 'sxyz')
 
@@ -91,6 +95,9 @@ class PositionPIDController:
             self.controllers_[dof].updatebyerror(error)
 
     def cmd_vel_pub(self):
+        if self.pose_ref_published == False:
+            return
+            
         cmd_vel = Twist()
         twist = []
 

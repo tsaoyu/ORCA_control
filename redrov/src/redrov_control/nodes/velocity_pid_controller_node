@@ -15,6 +15,7 @@ class VelocityPIDController:
         self.para_names_ = ["kp", "ki", "kd"]
         self.setup_subs()
         self.setup_pubs()
+        self.cmd_vel_published = False
 
         self.get_control_params()
         self.controllers_ = {}
@@ -31,8 +32,7 @@ class VelocityPIDController:
     def setup_subs(self):
         rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback, queue_size=50)
         rospy.Subscriber('/BodyROV01/odom', Odometry, self.odom_callback, queue_size=50)
-        # rospy.Subscriber('/velocity_controller_enabled', Bool,
-        # self.control_enabler, queue_size=10)
+
 
     def setup_pubs(self):
         self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
@@ -83,6 +83,8 @@ class VelocityPIDController:
 
 
     def cmd_vel_callback(self, msg):
+        if self.cmd_vel_published == False:
+            self.cmd_vel_published = True
         cmd_vel = [msg.linear.x, msg.linear.y, msg.linear.z, msg.angular.x, msg.angular.y, msg.angular.z]
         
         for dof, cmd in zip(self.dof_names_, cmd_vel):
@@ -101,6 +103,8 @@ class VelocityPIDController:
             # print(self.controllers_[dof].output)
 
     def cmd_wrench_pub(self):
+        if self.cmd_vel_published == False:
+            return
         cmd_wrench = Wrench()
         wrench = []
 
