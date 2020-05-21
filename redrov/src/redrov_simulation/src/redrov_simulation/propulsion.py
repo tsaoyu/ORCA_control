@@ -25,11 +25,11 @@ prop_matrix = np.array(
 
 def prop_character(effort):
 
-    if abs(effort) > 100:
+    if abs(effort) > 1:
         print("Effort out of range!")
         return
         
-    command = effort / 100.
+    command = effort 
     force  = np.polyval(fit_param, command)
     return force
 
@@ -38,18 +38,16 @@ def BlueROV2Input(wrench_input, frame="4dof"):
         raise NotImplementedError
 
     effort = np.dot(allocation_matrix, wrench_input)
-    effort = np.clip(effort, -100, 100)
-    # print(effort)
-    u = [prop_character(i) for i in effort]
-    # print(u)                                  
+    effort = np.clip(effort, -1, 1)
+    u = [prop_character(i) for i in effort]                             
     tau = np.dot(prop_matrix, u)
     return tau
 
 
 if __name__ == "__main__":
   
-    print(BlueROV2Input([50,0,0,0]))
-    print(BlueROV2Input([-50,0,0,0]))
-    print(BlueROV2Input([0,50,0,0]))
-    print(BlueROV2Input([0,0,50,0]))
-    print(BlueROV2Input([0,0,0,50]))
+    print(BlueROV2Input([0.5,0,0,0]))
+    print(BlueROV2Input([-0.50,0,0,0]))
+    print(BlueROV2Input([0,0.50,0,0]))
+    print(BlueROV2Input([0,0,0.50,0]))
+    print(BlueROV2Input([0,0,0,0.50]))

@@ -92,7 +92,6 @@ catkin_python_setup()
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
-  cfg/PID.cfg
   cfg/pid_velocity_config.cfg
   cfg/pid_position_config.cfg
 )
@@ -140,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 
-add_executable(pid_controller_node src/PID_controller_node.cpp src/PID_controller.cpp)
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,11 +150,9 @@ add_executable(pid_controller_node src/PID_controller_node.cpp src/PID_controlle
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 
-add_dependencies(pid_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(pid_controller_node ${catkin_LIBRARIES}
-)
+
 
 #############
 ## Install ##

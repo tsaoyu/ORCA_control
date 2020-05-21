@@ -92,7 +92,7 @@ if __name__ == "__main__":
     rov_sim = ROVSimulation()
    
 
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(50)
     while not rospy.is_shutdown():
         try:
             rov_sim.odom_pub()
