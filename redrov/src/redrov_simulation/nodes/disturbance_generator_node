@@ -1,0 +1,72 @@
+#!/usr/bin/python
+import rospy
+
+from geometry_msgs.msg import Wrench, PoseStamped
+from math import sin
+
+
+class DisturbanceGenerator():
+
+    def __init__(self):
+        
+        self.control_sub = rospy.Subscriber("/cmd_wrench", Wrench, self.wait_control, queue_size=10)
+        self.disturbance_pub = rospy.Publisher("/disturbance", Wrench, queue_size=10)
+
+        self.t_start = 0
+        self.control_start = False
+
+    def wait_control(self, msg):
+        
+        if not self.control_start:
+            self.control_start = True
+            self.t_start = rospy.Time.now()
+
+
+    def generate_disturbance(self, signals, start=0, end=None):
+
+        # signal {'x': sin(x)} etc.
+
+        if not self.control_start:
+            return
+        
+        disturbance = Wrench()
+        t = rospy.Time.now() - self.control_start
+        if end:
+            if t >= start and t <= end:
+                for dof, signal in signals.items():
+                    if dof == 'x':
+                        disturbance.force.x = signal(t)
+                    elif dof == 'y':
+                        disturbance.force.y = signal(t)
+                    elif dof == 'z':
+                        disturbance.force.z = signal(t)
+                    elif dof == 'k':
+                        disturbance.torque.x = signal(t)
+                    elif dof == 'm':
+                        disturbance.torque.y = signal(t)
+                    elif dof == 'n':
+                        disturbance.torque.z = signal(t)
+
+        self.disturbance_pub.publish(disturbance)
+
+
+
+
+if __name__ == "__main__":
+    rospy.init_node("disturbance_generator", anonymous = False)
+
+
+    rate = rospy.Rate(50)
+    dg = DisturbanceGenerator()
+
+    signals = {'z':sin}
+
+    while not rospy.is_shutdown():
+        try:
+            dg.generate_disturbance(signals, start=2.1, end=2.2)
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
+
+
+

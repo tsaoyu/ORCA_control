@@ -8,20 +8,11 @@ High quality ROS package for underwater robotics control and navigation.
 
 ![](https://github.com/tsaoyu/ORCA_control/workflows/CI/badge.svg)
 
-## Disciplines
+## Contents
 
-Never write shit code and do shit things.
+- ROS driver for BlueROV2
+- Reconfigurable PID position/velocity controller
+- Manual Joystick control
+- Offline Git utilities
 
-## Motivations
-
-When you ask someone else kindly to share some code:
-
-![](images/when_you_ask.png)
-
-When you have been asked to share your data and your code:
-
-![](images/when_you_have_been_asked.png)
-
-Who is wasting the time?
-
-![](images/who_is_wasting_time.png)
+For more advanced position controllers please refer to ORCA advanced control project. 

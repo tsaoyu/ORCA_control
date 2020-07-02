@@ -1,10 +1,10 @@
 thrust_limits:
   translation:
-    max_effort: 40 # 0~100 Control effort
+    max_effort: 0.4 # 0~1 Control effort
     max_speed: 2
     limit: 400     # 0~400 PWM range
 
   rotation:
-    max_effort: 40  # 0~100 Control effort
+    max_effort: 0.4  # 0~1 Control effort
     max_speed: 3  
     limit: 400      # 0~400 PWM range
