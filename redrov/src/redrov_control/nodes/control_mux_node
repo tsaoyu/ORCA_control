@@ -1,0 +1,57 @@
+#!/usr/bin/python
+from operator import itemgetter
+import rospy
+
+from std_msgs.msg import String
+from geometry_msgs.msg import Wrench
+
+class Multiplexer():
+
+    def __init__(self):
+        self.wrench = Wrench()
+        self.controller_config = {}
+        self.controller_config = rospy.get_param("/controllers")
+        self.config_dict = {item['name']:item for item in self.controller_config}
+        self.wrench_pub = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
+        self.controller_name = None
+        self.create_sub()
+
+    def create_sub(self):
+        self.controller_name_sub = rospy.Subscriber('/use_controller', String, self.switch_controller, queue_size=10)
+      
+        if self.controller_name == None:
+            self.controller_name = sorted(self.config_dict.values(), key=itemgetter('priority'), reverse=True)[0]['name']
+
+        self.wrench_sub = rospy.Subscriber(self.config_dict[self.controller_name]['topic'], Wrench, self.wrench_callback, queue_size=10)
+        self.current_controller_name = self.controller_name
+        
+    def wrench_callback(self, msg):
+        self.wrench = msg
+
+    def publish_wrench(self):
+        self.wrench_pub.publish(self.wrench)
+        
+    def switch_controller(self, msg):
+        if msg.data != self.current_controller_name:
+            self.controller_name = msg.data
+            self.wrench_sub.unregister()
+            self.wrench_sub = rospy.Subscriber(self.config_dict[self.controller_name]['topic'], Wrench, self.wrench_callback, queue_size=10)
+            self.current_controller_name = self.controller_name
+
+
+if __name__ == "__main__":
+    rospy.init_node("controller_mux", anonymous = False)
+    multiplexer = Multiplexer()
+   
+
+    rate = rospy.Rate(50)
+    while not rospy.is_shutdown():
+        try:
+            multiplexer.publish_wrench()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
+    mux = Switcher()
+
+
+

@@ -35,7 +35,7 @@ class VelocityPIDController:
         # self.control_enabler, queue_size=10)
 
     def setup_pubs(self):
-        self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
+        self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench_pid', Wrench, queue_size=10)
 
     def get_control_params(self):
         self.control_params_ = rospy.get_param('/velocity_controllers')
