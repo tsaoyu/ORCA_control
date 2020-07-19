@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="My Plugin" type="redrov_control.rqt_module.MyPlugin" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      rqt multiplexer plugin
+    </description>
+    <qtgui>
+      <!-- optional grouping...
+      <group>
+        <label>Group</label>
+      </group>
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>Control multiplexer</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Switch between different controllers with confidence. </statustip>
+    </qtgui>
+  </class>
+</library>
