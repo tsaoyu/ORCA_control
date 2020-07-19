@@ -42,7 +42,6 @@ class Multiplexer():
 if __name__ == "__main__":
     rospy.init_node("controller_mux", anonymous = False)
     multiplexer = Multiplexer()
-   
 
     rate = rospy.Rate(50)
     while not rospy.is_shutdown():
@@ -51,7 +50,6 @@ if __name__ == "__main__":
             rate.sleep()
         except rospy.ROSInterruptException:
             break
-    mux = Switcher()
 
 
 
