@@ -57,6 +57,7 @@ Require full ROS network setting and real hardware. -->
     <node machine="rov" name="velocity_pid_controller" pkg="redrov_control" type="velocity_pid_controller_node" output="screen"/>
 
     <!-- Multiplexer -->
+    <rosparam file="$(find redrov_control)/config/mux_config.yaml" />
     <node name="control_mux" pkg="redrov_control" type="control_mux_node" output="screen"/>
 
     <!-- Visulisation -->
