@@ -24,7 +24,7 @@ Require full ROS network setting and real hardware. -->
     <node machine="top" pkg="mocap_qualisys" type="mocap_qualisys_node" name="qualisys" output="screen">
         <param name="server_address" value="192.168.1.51"/>
         <param name="server_base_port" value="22222"/>
-        <param name="frame_rate" value="100"/>
+        <param name="frame_rate" value="50"/>
         <param name="max_accel" value="3"/>
         <param name="publish_tf" value="true"/>
         <param name="fixed_frame_id" value="world"/>
