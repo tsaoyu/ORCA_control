@@ -1,0 +1,68 @@
+import pylab
+import scipy
+
+x = scipy.linspace(-1.5,1.5,1000)
+y_u = 0.25*scipy.sqrt(1.5-(abs(1.47*x)-1)**2)
+y_l = -0.8* scipy.sqrt(1-(abs(x)/1.5)**0.5)
+pylab.fill_between(x, y_u, color='blue')
+pylab.fill_between(x, y_l, color='blue')
+pylab.xlim([-2.5, 2.5])
+pylab.text(0, -0.1, 'NHS thankyou', fontsize=24, fontweight='bold',
+           color='white', horizontalalignment='center')
+pylab.savefig('heart.png')
+
+x1 = x[500:].tolist()
+y1 = y_u[500:].tolist()
+x2 = x[500:][::-1].tolist()
+y2 = y_l[500:][::-1].tolist()
+x3 = x[:500][::-1].tolist()
+y3 = y_l[:500][::-1].tolist()
+x4 = x[:500].tolist()
+y4 = y_u[:500].tolist()
+
+x_all = x1 + x2 + x3 + x4
+y_all = y1 + y2 + y3 + y4
+
+import rospy
+
+from geometry_msgs.msg import Twist, Wrench, Pose, PoseStamped
+
+class HeartTrajGen():
+
+    def __init__(self):
+        self.counter = 0
+
+    def setup_pubs(self):
+        self.pose_publisher = rospy.Publisher('/pose_ref', PoseStamped, queue_size=10)
+
+
+    def publish_pose(self):
+        pose = PoseStamped()
+        pose.pose.position.x = x_all[self.counter]
+        pose.pose.position.y = y_all[self.counter]
+        pose.pose.position.z = - 0.5
+
+        pose.pose.orientation.x = 0
+        pose.pose.orientation.y = 0
+        pose.pose.orientation.z = 0
+        pose.pose.orientation.w = 1
+
+        self.pose_publisher.publish(pose)
+        if self.counter < 2000:
+            self.counter += 1
+    
+    
+if __name__ == "__main__":
+
+    rospy.init_node("nhs_heart_gen", anonymous = False)
+    nhs_pos_gen = HeartTrajGen()
+   
+
+    rate = rospy.Rate(20)
+    while not rospy.is_shutdown():
+        try:
+            nhs_pos_gen.publish_pose()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break
+
