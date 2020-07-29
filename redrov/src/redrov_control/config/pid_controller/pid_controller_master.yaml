@@ -1,7 +1,7 @@
 velocity_controllers:
   surge:
-    Kp: 0.2
-    Ki: 0
+    Kp: 0.5
+    Ki: 0.1
     Kd: 0
     upper_limit: 1
     lower_limit: -1
@@ -12,8 +12,8 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/surge
 
   sway:
-    Kp: 0.2
-    Ki: 0
+    Kp: 0.5
+    Ki: 0.1
     Kd: 0
     upper_limit: 1
     lower_limit: -1
@@ -24,8 +24,8 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/sway
 
   heave:
-    Kp: 0.4
-    Ki: 0
+    Kp: 0.5
+    Ki: 0.1
     Kd: 0
     upper_limit: 1
     lower_limit: -1
@@ -73,7 +73,7 @@ velocity_controllers:
 
 position_controllers:
   x:
-    Kp: 1
+    Kp: 0.17
     Ki: 0
     Kd: 0
     upper_limit: 2
@@ -85,7 +85,7 @@ position_controllers:
     topic_from_plant: /position_controllers/meas/x
 
   y:
-    Kp: 1
+    Kp: 0.17
     Ki: 0
     Kd: 0
     upper_limit: 2
@@ -98,8 +98,8 @@ position_controllers:
 
 
   z:
-    Kp: 1
-    Ki: 0.5
+    Kp: 0.17
+    Ki: 0.001
     Kd: 0
     upper_limit: 1
     lower_limit: -1
