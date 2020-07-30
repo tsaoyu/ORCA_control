@@ -1,7 +1,7 @@
 velocity_controllers:
   surge:
     Kp: 0.5
-    Ki: 0.1
+    Ki: 0.2
     Kd: 0
     upper_limit: 1
     lower_limit: -1
@@ -13,7 +13,7 @@ velocity_controllers:
 
   sway:
     Kp: 0.5
-    Ki: 0.1
+    Ki: 0.2
     Kd: 0
     upper_limit: 1
     lower_limit: -1
@@ -60,7 +60,7 @@ velocity_controllers:
     topic_from_plant: /velocity_controllers/meas/pitch
 
   yaw:
-    Kp: 0.3
+    Kp: 0.1
     Ki: 0
     Kd: 0
     upper_limit: 1
