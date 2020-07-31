@@ -61,7 +61,7 @@ velocity_controllers:
 
   yaw:
     Kp: 0.1
-    Ki: 0
+    Ki: 0.1
     Kd: 0
     upper_limit: 1
     lower_limit: -1
