@@ -30,15 +30,35 @@ roslaunch redrov_missions station_keeping.launch
 
 ![](images/joystick.png)
 
-At any time, you can press `DISARM` to lock the 
+At any time, you can press `DISARM` to lock the propellers. Three other modes (depth hold, stablised and manual) allow you to take over the control when you `ARM` the vehicle again. 
+
 
 
 
 ## Advanced usage
-A more advanced use case is the software and hardware-in-the-loop (HIL) simulation.
+A more advanced use case is the software and hardware-in-the-loop (HIL) simulation. Pure software simulation is provided as part of the package.
+The visulisation requires [UUVsimulator](https://uuvsimulator.github.io/). You can launch it through:
+
+```bash
+roslaunch redrov_simulation station_keeping_sim.launch 
+```
+
+Manual drive simulation let you get used to the drive of ROV without hardware:
+```
+roslaunch redrov_simulation manual_sim.launch 
+```
+Before putting your ROV into the water, you may want to test everything together with your hardware.
+
+```
+roslaunch redrov_simulation station_keeping.launch
+```
+
 
 ## Handy tools
 We provide a couple of useful tools to ease the development and deployment of the control software. 
+Check utilities folder for tools to sync time between base computer, offline Git version control and one click software update.
+This [blog post](https://blog.tsaoyu.com/articles/offline-git-robot) explains the use of offline git tools in detail.
+
 
 ## Network configuration
 
@@ -66,7 +86,8 @@ export ROS_MASTER_URI=http://192.168.2.2:11311
 ```
 
 ## Disclaim
-The author release the code WITHOUT ANY GUARANTEE.
+The author release the code WITHOUT ANY GUARANTEE. The user takes the sole responsibilities including but not limited to the injure, casualty and other losses.
 
 ## Acknowledgement
-This project is part of 
+This work was funded by the EPSRC as part of the UK Robotics and Artificial Intelligence Hub for Offshore Energy Asset Integrity
+Management (ORCA-Hub) under grant EP/R026173/1. 
