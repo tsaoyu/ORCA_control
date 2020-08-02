@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.18">
-<info created="D:20200802154825" modified="D:20200802154825"/>
+<info created="D:20200802154825" modified="D:20200802155721"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -386,5 +386,7 @@ h
 </path>
 <text transformations="translations" pos="72 720" stroke="black" type="label" width="34.897" height="6.808" depth="0" valign="baseline">Internet</text>
 <text transformations="translations" pos="88 688" stroke="black" type="label" width="41.165" height="6.815" depth="1.93" valign="baseline">WiFi, 5G</text>
+<text matrix="1 0 0 1 -16.2 0" transformations="translations" pos="240 604" stroke="black" type="label" width="47.821" height="7.473" depth="2.49" valign="baseline">USB/serial</text>
+<text matrix="1 0 0 1 -3 2" transformations="translations" pos="108 600" stroke="black" type="label" width="20.34" height="6.808" depth="0" valign="baseline">ROS</text>
 </page>
 </ipe>
