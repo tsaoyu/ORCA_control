@@ -12,8 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   # ct_optcon
   roscpp
   rospy
-  rqt_gui
-  rqt_gui_py
+  # rqt_gui
+  # rqt_gui_py
   std_msgs
   dynamic_reconfigure
 )
