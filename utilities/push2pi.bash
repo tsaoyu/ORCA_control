@@ -6,4 +6,4 @@ git push ${JETSON_USER:=pi}@$BLUEROV2_IP:orca-bluerov-bare
 
 
 echo "Pulling from bareclone on the robot..."
-ssh $JETSON_USER@$BLUEROV2_IP 'cd ~/ORCA_control; git pull bareclone master'
+ssh $JETSON_USER@$BLUEROV2_IP 'cd ~/ORCA_control; git pull bareclone heavy-dev'
