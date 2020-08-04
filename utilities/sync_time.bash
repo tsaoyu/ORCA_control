@@ -12,8 +12,9 @@
 
 set -e
 
-echo "Sending time to the nano at ${BLUEROV2_IP:=192.168.2.2}..."
+echo "Sending time to the pi at ${BLUEROV2_IP:=192.168.2.2} and nano at ${CAMERA_IP:=192.168.2.95}..."
 TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%S)
 
 set -x
-ssh -t  ${JETSON_USER:=laodi}@$BLUEROV2_IP "sudo date --utc +%Y-%m-%dT%H:%M:%S -s $TIMESTAMP"
+ssh -t  ${PI_USER:=pi}@$BLUEROV2_IP "sudo date --utc +%Y-%m-%dT%H:%M:%S -s $TIMESTAMP"
+ssh -t  ${CAMERA_USER:=osllab}@$CAMERA_IP "sudo date --utc +%Y-%m-%dT%H:%M:%S -s $TIMESTAMP"
