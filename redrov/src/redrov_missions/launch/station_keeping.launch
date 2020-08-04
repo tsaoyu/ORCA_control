@@ -12,7 +12,6 @@ Require full ROS network setting and real hardware. -->
     <!-- Logging -->
     <include file="$(find redrov_missions)/launch/data_logger.launch" />
 
-
     <!-- Hardware -->
     <rosparam file="$(find redrov_control)/config/propulsion_config.yaml" />
 
