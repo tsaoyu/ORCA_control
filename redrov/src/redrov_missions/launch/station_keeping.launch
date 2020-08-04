@@ -2,8 +2,8 @@
 <!-- This is the station keeping HIL launch file.
 Require full ROS network setting and real hardware. -->
 
-    <arg name="TOP_NAME" default="yu"/> 
-    <arg name="ROV_NAME" default="laodi"/>
+    <arg name="TOP_NAME" default="osl"/> 
+    <arg name="ROV_NAME" default="pi"/>
     <!-- can be overwritten by env variables -->
 
     <machine name="top" address="192.168.2.1" user="$(arg TOP_NAME)" env-loader="/home/$(arg TOP_NAME)/ORCA_control/redrov/src/redrov_missions/scripts/$(arg TOP_NAME)_setup.bash"/>
@@ -46,7 +46,7 @@ Require full ROS network setting and real hardware. -->
     </node> -->
 
 
-    <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/>
+    <!-- <node machine="rov" pkg="redrov_missions" name="mavlink_router" type="mavrouter.sh"/> -->
     <node machine="rov" pkg="redrov_control" name="joy_manual_control_node" type="joy_manual_control_node" output="screen"/>
     <!-- <include file="$(find ping360_sonar)/launch/example.launch" /> -->
 
@@ -61,12 +61,54 @@ Require full ROS network setting and real hardware. -->
     <node name="control_mux" pkg="redrov_control" type="control_mux_node" output="screen"/>
 
     <!-- Visulisation -->
+<!-- 
+    <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/> -->
 
-    <node machine="top" pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
-
-    <group>
+    <!-- <group>
         <machine name="top_HIL" address="192.168.2.1" user="$(arg TOP_NAME)" default="true"/>
         <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch"/>
-    </group>
+    </group> -->
 
+    <!-- HW launches-->
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_DVL_2_bl" args="1 0 0 0 0 0 base_link base_DVL" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="imu_link_2_bl" args="1 0 0 0 0 0 1 base_link imu_link" />
+
+  <!-- start DVL -->
+  <arg name="port" default="/dev/ttyAMA0" doc="serial port"/>
+  <arg name="baudrate" default="9600" doc="serial baud rate"/>
+  <arg name="frame" default="dvl" doc="frame ID"/>
+  <arg name="timeout" default="1.0" doc="serial read timeout in seconds"/>
+  <node machine="rov" name="teledyne_explorer"
+        pkg="teledyne_explorer"
+        type="teledyne_explorer"
+        output="screen"
+        respawn="true"
+        respawn_delay="5">
+    <!-- Set ROS parameters -->
+    <param name="port" value="$(arg port)" type="str"/>
+    <param name="baudrate" value="$(arg baudrate)" type="int"/>
+    <param name="frame" value="$(arg frame)" type="str"/>
+    <param name="timeout" value="$(arg timeout)" type="double"/>
+  </node>
+
+  <!-- Convert data from blueROV for localisation node -->
+  <node machine="rov" pkg="bluerov_ros_playground" type="SensorDataConverter.py" name="SensorDataConverter" clear_params="true" output="$(arg log_output)">
+
+  </node>
+
+
+   <!-- State estimation based on raw data, no filter: publishes on /odometry/raw -->
+   <node machine="rov" pkg="bluerov_ros_playground" type="rigidBody.py" name="rigidBody" clear_params="true" output="$(arg log_output)">
+
+   </node>
+
+<!-- Pilot converter, to be integrated later -->
+	<!-- <node pkg="bluerov_ros_playground" type="pilot_converter.py" name="DVL_converter" output="$(arg log_output)"/>  -->
+
+
+<!-- State estimation based EKF: publishes on /odometry/filtered -->
+	<node machine="rov" pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true" output="$(arg log_output)">
+    	<rosparam command="load" file="$(find robot_localization)/params/blueROV2.yaml" />
+  </node>
 </launch>
