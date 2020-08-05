@@ -3,31 +3,61 @@ from __future__ import division
 import rospy
 import numpy as np
 
+
 from geometry_msgs.msg import PoseStamped, Quaternion
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 
 radius = 1.7
 num_samples = 1000
-x = np.linspace(-radius, radius, num_samples)
-y_upper =  np.sqrt(radius ** 2 - x ** 2)
-y_lower = -np.sqrt(radius ** 2 - x ** 2)
-yaw_upper = np.arctan2(y_upper, x) + np.pi/2
-yaw_lower = np.arctan2(y_lower, x) + np.pi/2
+angle1 = np.linspace(0, np.pi-0.05, 2*num_samples)
+angle2 = np.linspace(-(np.pi-0.05), 0, 2*num_samples)
+angle = np.concatenate([angle1, angle2])
+
+x = radius * np.cos(angle)
+y = radius * np.sin(angle)
+
+yaw = (angle + 2* np.pi) % (2* np.pi) - np.pi
+
+print(x[0], y[0], yaw[0])
 
 # we would like to start from the side near us, counter-clockwise
 
-x_ccw = x[num_samples//2:].tolist() + x[::-1].tolist() + x[:num_samples//2].tolist()
-y_ccw = y_lower[num_samples//2:].tolist() + y_upper[::-1].tolist() + y_lower[:num_samples//2].tolist()
-yaw_ccw = yaw_lower[num_samples//2:].tolist() + yaw_upper[::-1].tolist() + yaw_lower[:num_samples//2].tolist()
+# x_ccw = x[num_samples//2:].tolist() + x[::-1].tolist() + x[:num_samples//2].tolist()
+# y_ccw = y_lower[num_samples//2:].tolist() + y_upper[::-1].tolist() + y_lower[:num_samples//2].tolist()
+# yaw_ccw = yaw_lower[num_samples//2:].tolist() + yaw_upper[::-1].tolist() + yaw_lower[:num_samples//2].tolist()
 
 # print(x_ccw[0], y_ccw[0], yaw_ccw[0])
 # print(x_ccw[500], y_ccw[500], yaw_ccw[500])
 # print(x_ccw[1500], y_ccw[1500], yaw_ccw[1500])
 # print(x_ccw[1999], y_ccw[1999], yaw_ccw[1999])
 
+def check_traj():
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+    fig, ax = plt.subplots()
+    plt.axis('equal')
+
+    line, = ax.plot(x, yaw)
 
 
+    def init():  # only required for blitting to give a clean slate.
+        line.set_ydata([np.nan] * len(x))
+        return line,
+
+
+    def animate(i):
+        line.set_xdata(x[:i]) 
+        line.set_ydata(y[:i])  # update the data.
+        return line,
+
+
+    ani = animation.FuncAnimation(
+        fig, animate, init_func=init, interval=2, blit=True, save_count=50)
+
+    plt.show()
+
+# check_traj()
 class CircTrajGen():
 
     def __init__(self, repeat=False, depth=-1):
@@ -43,11 +73,11 @@ class CircTrajGen():
 
     def publish_pose(self):
         pose = PoseStamped()
-        pose.pose.position.x = x_ccw[self.counter]
-        pose.pose.position.y = y_ccw[self.counter]
+        pose.pose.position.x = x[self.counter]
+        pose.pose.position.y = y[self.counter]
         pose.pose.position.z = self.depth
 
-        q = quaternion_from_euler(0, 0, yaw_ccw[self.counter])
+        q = quaternion_from_euler(0, 0, yaw[self.counter])
         pose.pose.orientation = Quaternion(*q)
 
         self.pose_publisher.publish(pose)
@@ -63,7 +93,7 @@ if __name__ == "__main__":
     traj_gen = CircTrajGen(repeat=False, depth=3)
    
 
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(20)
     while not rospy.is_shutdown():
         try:
             traj_gen.publish_pose()
