@@ -10,9 +10,12 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 radius = 1.7
 num_samples = 1000
-angle1 = np.linspace(0, np.pi-0.05, 2*num_samples)
-angle2 = np.linspace(-(np.pi-0.05), 0, 2*num_samples)
-angle = np.concatenate([angle1, angle2])
+# angle1 = np.linspace(-(np.pi), -0.2, num_samples)
+# angle2 = np.linspace(0.2, np.pi, num_samples)
+
+# angle = np.concatenate([angle1, angle2])
+
+angle = np.linspace(-np.pi, np.pi, 2*num_samples)
 
 x = radius * np.cos(angle)
 y = radius * np.sin(angle)
