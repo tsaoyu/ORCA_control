@@ -8,7 +8,7 @@
 # 14552 - Dashboard
 
 
-mavproxy.py --master=/dev/ttyPX4 \
+mavproxy.py --master=/dev/autopilot \
 --baudrate=115200 \
 --load-module='GPSInput' \
 --source-system=200 \

@@ -8,7 +8,7 @@
 # 14551 - ROS based control
 # 14552 - Dashboard
 
-mavlink-routerd /dev/ttyPX4:115200 \
+mavlink-routerd /dev/autopilot:115200 \
 --e 192.168.2.1:14550 \
 --e 192.168.2.2:14550 \
 --e 192.168.2.2:14551 \
