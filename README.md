@@ -84,6 +84,14 @@ export ROV_NAME=laodi
 export ROS_HOSTNAME=laoge
 export ROS_MASTER_URI=http://192.168.2.2:11311
 ```
+## Citation
+
+Please cite this paper if you use this code and/or data for your research.
+
+Early access version: https://ieeexplore.ieee.org/document/9180253
+(We have made this paper open access, so please have a look, it is free.) 
+
+
 
 ## Disclaim
 The author release the code WITHOUT ANY GUARANTEE. The user takes the sole responsibilities including but not limited to the injure, casualty and other losses.
