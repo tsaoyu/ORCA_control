@@ -8,7 +8,7 @@ from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget
 
-from redrov_control.QLed import QLed
+
 
 class MyPlugin(Plugin):
 
