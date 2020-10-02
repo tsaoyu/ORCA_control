@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+import rospy
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, PoseStamped, Wrench
+import tf
+import numpy as np
+import math
+import time
+from tf.transformations import quaternion_inverse, quaternion_multiply, quaternion_conjugate
+from redrov_control.smc import SMC
+
+def Eul2Quat(phi,theta,psi):
+    ''' Euler angle to quaternions
+        phi:   roll
+        theta: pitch
+        psi:   yaw
+        q1:     w
+        q2:     x
+        q3:     y
+        q4:     z   '''
+    c1=math.cos(phi*0.5)
+    s1=math.sin(phi*0.5)
+    c2=math.cos(theta*0.5)
+    s2=math.sin(theta*0.5)
+    c3=math.cos(psi*0.5)
+    s3=math.sin(psi*0.5)
+    q1=c1*c2*c3+s1*s2*s3
+    q2=s1*c2*c3-c1*s2*s3
+    q3=c1*s2*c3+s1*c2*s3
+    q4=c1*c2*s3-s1*s2*c3
+    return q1,q2,q3,q4
+
+def Quat2Eul(q1,q2,q3,q4):
+    ''' quaternions to Euler angle
+        q1:     w
+        q2:     x
+        q3:     y
+        q4:     z
+        phi:   roll
+        theta: pitch
+        psi:   yaw      '''
+    phi=math.atan2(2*(q1*q2+q3*q4),1-2*(q2*q2+q3*q3))
+    theta=math.asin(2*(q1*q3-q2*q4))
+    psi=math.atan2(2*(q1*q4+q2*q3),1-2*(q3*q3+q4*q4))
+    return phi,theta,psi
+
+class SlidingModeController():
+    ''' receive current ROV state & reference ROV state
+        eta_error updates with current state
+        eta_reference updates with reference state'''
+    def __init__(self):
+        ''' inputs
+    		eta: 		current   position(x,y,z,phi,theta,psi) 
+    		eta_d:	  	reference position(x,y,z,phi,theta,psi) 
+    		outputs
+    		tau_v: 		output forces and moments(x,y,z,phi,theta,psi) 
+    		'''
+    	self.eta    =np.zeros(6)  		# current position   (x,y,z,phi,theta,psi) earth frame
+    	self.velocity=np.zeros(6) 		# current velocity   (u,v,w,p,q,r) body-fixed frame
+    	self.eta_d=np.zeros(6)			# reference position (x,y,z,phi,theta,psi)
+    	self.last_eta_d=np.zeros(6)			# previous reference position (x,y,z,phi,theta,psi)
+    	self.eta_d_dot=np.zeros(6)	 	# differential of reference position [m/s,m/s,m/s,rad/s,rad/s,rad/s]
+    	self.controller=SMC()
+    	self.setup_subs() 					# current pose, reference pose
+    	self.setup_pubs() 					# publish force & torque 
+    	self.current_time=time.time() 		# current time [s]
+    	self.last_time=self.current_time 	# last time [s]
+
+    def setup_subs(self):
+    	''' Subscriber
+    		odom_sub: subscribe vehicle's current state
+    		pose_sub: subscribe reference state
+    		'''
+    	self.odom_sub=rospy.Subscriber('/BodyROV01/odom', Odometry, self.odom_callback, queue_size=50)
+    	self.pose_sub=rospy.Subscriber('/pose_ref', PoseStamped, self.pose_ref_callback, queue_size=50)
+
+    def setup_pubs(self):
+    	''' Publisher
+    		cmd_wrench_publisher: publish controller's ouput 
+    		'''
+        self.cmd_wrench_publisher = rospy.Publisher('/cmd_wrench', Wrench, queue_size=10)
+
+    def odom_callback(self, msg):
+    	''' update vehicle's position ,error 
+    		msg: 			current state [Odometry] 
+    			 			msg.pose.pose.position & orientation; 
+    			 			msg.twist.twist.linear & angular
+    		self.eta: 		current position -- earth frame
+    			 			(x,y,z,phi,theta,psi) 	
+    			 			[m,m,m,rad,rad,rad]  	
+    		self.velocity: 	current velocity -- body-fixed frame
+    						(u,v,w,p,q,r)
+    						[m/s,m/s,m/s,rad/s,rad/s,rad/s] '''
+        ow=msg.pose.pose.orientation.w
+    	ox=msg.pose.pose.orientation.x
+    	oy=msg.pose.pose.orientation.y
+    	oz=msg.pose.pose.orientation.z
+    	phi,theta,psi=Quat2Eul(ow,ox,oy,oz)
+        self.eta     = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z, phi, theta, psi])
+        self.velocity= np.array([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z, msg.twist.twist.angular.x,  msg.twist.twist.angular.y,  msg.twist.twist.angular.z])
+    	self.controller.update(self.eta, self.velocity) 	# update all parameters and output
+
+    def pose_ref_callback(self, msg):
+    	'''	update reference position 
+    		msg: 			reference state [PoseStamped]	
+    						msg.pose.position & orientation; 
+    		eta_ref: 		reference position 
+    						(x,y,z,phi,theta,psi) 	
+    						[m,m,m,rad,rad,rad]
+    		eta_ref_dot: 	reference position differential
+    						(x_dot,y_dot,z_dot,phi_dot,theta_dot,psi_dot) 	
+    						[m/s,m/s,m/s,rad/s,rad/s,rad/s] '''
+    	self.current_time=time.time()
+    	delta_time=self.current_time-self.last_time
+
+        ow=msg.pose.orientation.w
+    	ox=msg.pose.orientation.x
+    	oy=msg.pose.orientation.y
+    	oz=msg.pose.orientation.z
+    	phi,theta,psi=Quat2Eul(ow,ox,oy,oz)
+    	# print("ref_callback%s"%(msg))
+        self.eta_d = np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, phi, theta, psi])
+    	self.eta_d_dot=(self.eta_d-self.last_eta_d)/delta_time
+    	
+    	self.last_time = self.current_time
+    	self.last_eta_d=self.eta_d
+
+    	self.controller.updateEtad(self.eta_d,self.eta_d_dot) # set reference states
+
+    def cmd_wrench_pub(self):
+    	''' publish controller's ouput message
+    		cmd_wrench: [Wrench]
+    					force.x,y,z & torque.x,y,z
+    		tau_v: the forces and moments
+        		'''
+        tau_v = self.controller.tau_v
+        cmd_wrench = Wrench()
+        cmd_wrench.force.x, cmd_wrench.force.y, cmd_wrench.force.z, cmd_wrench.torque.x, cmd_wrench.torque.y, cmd_wrench.torque.z =tau_v[0],tau_v[1],tau_v[2],tau_v[3],tau_v[4],tau_v[5]
+
+        self.cmd_wrench_publisher.publish(cmd_wrench)
+
+if __name__ == "__main__":
+    
+    rospy.init_node('sliding_mode_control_node')
+    sliding_mode_controller = SlidingModeController()
+
+    rate = rospy.Rate(100)
+    while not rospy.is_shutdown():
+        try:
+            sliding_mode_controller.cmd_wrench_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break

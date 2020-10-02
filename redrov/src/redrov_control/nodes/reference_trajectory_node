@@ -1,0 +1,189 @@
+#!/usr/bin/env python
+import rospy
+import time
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, PoseStamped
+import tf
+import numpy as np
+import math
+from tf.transformations import quaternion_inverse, quaternion_multiply, quaternion_conjugate
+
+def Eul2Quat(phi,theta,psi):
+    ''' Euler angle to quaternions
+        phi:   roll
+        theta: pitch
+        psi:   yaw
+        q1:     w
+        q2:     x
+        q3:     y
+        q4:     z   '''
+    c1=math.cos(phi*0.5)
+    s1=math.sin(phi*0.5)
+    c2=math.cos(theta*0.5)
+    s2=math.sin(theta*0.5)
+    c3=math.cos(psi*0.5)
+    s3=math.sin(psi*0.5)
+    q1=c1*c2*c3+s1*s2*s3
+    q2=s1*c2*c3-c1*s2*s3
+    q3=c1*s2*c3+s1*c2*s3
+    q4=c1*c2*s3-s1*s2*c3
+    return q1,q2,q3,q4
+def Quat2Eul(q1,q2,q3,q4):
+    ''' quaternions to Euler angle
+        q1:     w
+        q2:     x
+        q3:     y
+        q4:     z
+        phi:   roll
+        theta: pitch
+        psi:   yaw      '''
+    phi=math.atan2(2*(q1*q2+q3*q4),1-2*(q2*q2+q3*q3))
+    theta=math.asin(2*(q1*q3-q2*q4))
+    psi=math.atan2(2*(q1*q4+q2*q3),1-2*(q3*q3+q4*q4))
+    return phi,theta,psi
+class PoseReference():
+
+    def __init__(self):
+
+        self.pose_reference = PoseStamped()
+        # self.pose_reference.header.frame_id = "BodyROV01"
+        
+        self.start_time = time.time()
+        self.current_time = time.time()-self.start_time
+        self.reference_publiser = rospy.Publisher('/pose_ref', PoseStamped, queue_size=10)
+
+    def x_reference(self,t):
+        ''' x-coordinate of reference trajectory 
+            t            : simulation time 0 ~ 60s
+            x_d          : reference coordinate(m)
+            initial value: 0m   
+            '''
+        x_d = 0
+        if t>= 0 and t<10:
+           x_d = 0
+    	if t>=10 and t<20:
+    		x_d = 0.3*(t-10) 
+    	if t>=20 and t<30:
+    		x_d = 0.6*math.sin(0.1*math.pi*(t-20))+3
+    	if t>=30 and t<40:
+    		x_d =-0.3*(t-30)+3
+    	if t>=40 and t<50:
+    		x_d =-0.6*math.sin(0.1*math.pi*(t-40))
+    	if t>=50 and t<=60:
+    		x_d = 0.3*(t-50)
+        if t>60:  # stop
+            x_d = 3
+    	return x_d
+    def y_reference(self,t):
+        '''y-coordinate of reference trajectory 
+    	   t  			 : simulation time 0 ~ 60s
+    	   y_d			 : reference coordinate(m)
+    	   initial value: 0m
+    	   '''
+    	y_d = 0
+    	if t>= 0 and t<10:
+    		y_d = 0
+    	if t>=10 and t<20:
+    		y_d = 0
+    	if t>=20 and t<30:
+    		y_d =-0.6*math.cos(0.1*math.pi*(t-20))+0.6
+    	if t>=30 and t<40:
+    		y_d = 1.2
+    	if t>=40 and t<50:
+    		y_d =-0.6*math.cos(0.1*math.pi*(t-40))+1.8
+    	if t>=50 and t<=60:
+    		y_d = 2.4
+    	if t>60:  # stop
+            y_d = 2.4
+        return y_d
+    def z_reference(self,t):
+        '''z-coordinate of reference trajectory 
+    	   t  			 : simulation time 0 ~ 60s
+    	   z_d			 : reference coordinate(m)
+    	   initial value: 0m
+    	   '''
+    	z_d = 0
+    	if t>= 0 and t<10:
+    		z_d = 0.2*t
+    	if t>=10 and t<=60:
+    		z_d = 2
+        if t>60:  # stop
+            z_d = 2
+    	return z_d
+    def phi_reference(self,t):
+        '''roll angle of reference trajectory 
+    	   t  			 : simulation time 0 ~ 60s
+    	   phi_d		 : reference roll angle(rad)
+    	   initial value: 0rad
+    	   '''
+    	phi_d = 0
+    	return phi_d
+    def theta_reference(self,t):
+        '''pitch angle of reference trajectory 
+    	   t  			 : simulation time 0 ~ 60s
+    	   theta_d		 : reference pitch angle(rad)
+    	   initial value: 0rad
+    	   '''
+    	theta_d = 0
+    	return theta_d
+    def psi_reference(self,t):
+        '''yaw angle of reference trajectory 
+    	   t  			 : simulation time 0 ~ 60s
+    	   psi_d		 : reference yaw angle(rad)
+    	   initial value: 0rad
+    	   '''
+    	psi_d = 0
+    	if t>= 0.0 and t<10:
+    		psi_d = 0
+    	if t>=10 and t<20:
+    		psi_d = 0
+    	if t>=20 and t<30:
+    		psi_d = 0.1*math.pi*(t-20)
+    	if t>=30 and t<40:
+    		psi_d = math.pi
+    	if t>=40 and t<50:
+    		psi_d = math.pi-0.1*math.pi*(t-40)
+    	if t>=50 and t<=60:
+    		psi_d = 0
+        if t>60:  # stop
+            psi_d = 0
+    	return psi_d
+    def reference_pub(self):
+    	''' update the reference trajectory
+    		t:  self.current_time(s)
+    		(x,y,z,phi,theta,psi) --- initial value: (0m,0m,0m,0rad,0rad,0rad) 
+    		'''
+    	self.current_time = time.time()-self.start_time
+    	t=self.current_time
+
+        # self.pose_reference.header.stamp = rospy.Time.now()
+
+    	self.pose_reference.pose.position.x = self.x_reference(t)
+    	self.pose_reference.pose.position.y = self.y_reference(t)
+    	self.pose_reference.pose.position.z = self.z_reference(t)
+        # Euler angle to quaternions
+        phi  =self.phi_reference(t) 
+        theta=self.theta_reference(t)
+        psi  =self.psi_reference(t)
+        w,x,y,z=Eul2Quat(phi,theta,psi)
+        self.pose_reference.pose.orientation.w = w
+    	self.pose_reference.pose.orientation.x = x
+    	self.pose_reference.pose.orientation.y = y
+    	self.pose_reference.pose.orientation.z = z
+        # print(self.pose_reference)
+    	self.reference_publiser.publish(self.pose_reference)
+
+if __name__ == "__main__":
+    
+    rospy.init_node('reference_trajectory_node')
+    poseReference = PoseReference()
+
+    rate = rospy.Rate(100)
+
+    while not rospy.is_shutdown() and poseReference.current_time<60:
+        try:
+            poseReference.reference_pub()
+            rate.sleep()
+        except rospy.ROSInterruptException:
+            break

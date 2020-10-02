@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- plant -->
+    <node pkg="redrov_simulation" name="redrov_simulation_node" type="rov_simulation_node" output="screen"/>
+    <!-- reference trajectory -->
+    <node pkg="redrov_control" name="reference_trajectory_node" type="reference_trajectory_node" output="screen"/>
+    <!-- controller -->
+    <node pkg="redrov_control" name="smc_node" type="smc_node" output="screen"/>
+    <!-- simulation -->
+    <node pkg="redrov_control" name="static_tf_publisher" type="static_tf_trans_publisher_node"/>
+    <include file="$(find redrov_simulation)/launch/upload_bluerov2.launch" />
+    <!-- display -->
+    <node pkg="rqt_gui" name="rqt_gui" type="rqt_gui" respawn="false"/>
+    <node pkg="rviz" name="rviz_gui" type="rviz" args="-d $(find redrov_control)/config/smc_sim.rviz"/>
+    
+</launch>
