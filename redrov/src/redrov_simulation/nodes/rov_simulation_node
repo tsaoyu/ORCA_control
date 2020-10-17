@@ -16,7 +16,7 @@ from redrov_simulation.rov_dynamics import BlueROV2Dynamic
 
 class ROVSimulation:
 
-    def __init__(self):
+    def __init__(self, sim_type='normal'):
         
         self.sim_history = pd.DataFrame()
         self.ode = ode(BlueROV2Dynamic).set_integrator('dop853', max_step = 0.01 , nsteps=5000)
@@ -27,6 +27,12 @@ class ROVSimulation:
         self.first_received = True
         rospy.Subscriber('/cmd_wrench', Wrench, self.step_simulation, queue_size=10)
         self.odom_publisher = rospy.Publisher('/BodyROV01/odom', Odometry, queue_size=10)
+        if sim_type == 'disturbance':
+            self.sim_type = 'disturbance'
+            rospy.Subscriber('/disturbance', Wrench, self.update_disturbance, queue_size=10)
+            self.disturbance = np.array([0, 0, 0, 0, 0, 0])
+        else:
+            self.sim_type = 'normal'
 
     def reset_time(self):
         self.ode.t = 0
@@ -49,10 +55,19 @@ class ROVSimulation:
         x_command, y_command, z_command = wrench_input.force.x, wrench_input.force.y, wrench_input.force.z
         yaw_command = wrench_input.torque.z
         tau = - np.array(BlueROV2Input([x_command, y_command, z_command, yaw_command]))
-
+        if self.sim_type == 'disturbance':
+            tau += self.disturbance
         self.current_state = self.ode.integrate(self.ode.t + t1)
         self.ode.set_f_params(tau)
-     
+    
+    def update_disturbance(self, disturbance):
+        self.disturbance = np.array([disturbance.force.x,
+                                     disturbance.force.y,
+                                     disturbance.force.z,
+                                     disturbance.torque.x,
+                                     disturbance.torque.x,
+                                     disturbance.torque.x])
+                                    
         
     def odom_pub(self):
         odom = Odometry()
